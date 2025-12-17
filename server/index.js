@@ -1,214 +1,356 @@
 import express from "express";
+
 import cors from "cors";
+
 import mongoose from "mongoose";
+
 import bcrypt from "bcrypt";
  
 import UserModel from "./models/UserModel.js";
+
 import PlaceModel from "./models/PlaceModel.js";
+
 import DelegateModel from "./models/DelegateModel.js";
  
 const app = express();
+
 app.use(cors());
+
 app.use(express.json());
  
+// =====================
+
 // ✅ Start Server
+
+// =====================
+
 const startServer = async () => {
+
   try {
+
     const conStr =
+
       "mongodb+srv://admin:1234@cluster0.fdhdemo.mongodb.net/OnTheWay?appName=Cluster0";
+ 
     await mongoose.connect(conStr);
+
     console.log("Database Connected..");
  
     const PORT = process.env.PORT || 5000;
+
     app.listen(PORT, () => console.log("Server connected at port", PORT));
+
   } catch (error) {
+
     console.log("Database connection error..", error);
+
   }
+
 };
- 
+
 startServer();
  
 // =====================
+
 // ✅ LOGIN
+
 // =====================
+
 app.post("/login", async (req, res) => {
+
   try {
+
     const { email, password } = req.body;
  
     if (!email || !password)
+
       return res.status(400).json({ message: "Email and password are required." });
  
     const user = await UserModel.findOne({ email });
+
     if (!user) return res.status(404).json({ message: "User not found..." });
  
     const ok = await bcrypt.compare(password, user.password);
+
     if (!ok) return res.status(401).json({ message: "Invalid Credentials.." });
  
     const safeUser = {
+
       _id: user._id,
+
       uname: user.uname,
+
       email: user.email,
+
       profilepic: user.profilepic,
+
       phone: user.phone,
+
       adminFlag: user.adminFlag,
+
     };
  
     return res.status(200).json({ user: safeUser, message: "Success" });
+
   } catch (error) {
+
     console.error("Login error:", error);
+
     return res.status(500).json({ message: "Server error" });
+
   }
+
 });
  
 // =====================
+
 // ✅ REGISTER
+
 // =====================
+
 app.post("/register", async (req, res) => {
+
   try {
-    const { uname, email, password, profilepic } = req.body;
+
+    const { uname, email, password, profilepic, phone } = req.body;
  
     if (!uname || !email || !password)
+
       return res.status(400).json({ message: "uname, email, password are required." });
  
     const exists = await UserModel.findOne({ email });
+
     if (exists) return res.status(409).json({ message: "User already exists..." });
  
     const hash_password = await bcrypt.hash(password, 10);
  
     const new_user = new UserModel({
+
       uname,
+
       email,
+
       password: hash_password,
+
       profilepic: profilepic || "",
+
+      phone: phone || "",
+
       adminFlag: "N",
+
     });
  
     await new_user.save();
+
     return res.status(200).json({ message: "Success" });
+
   } catch (error) {
+
     console.error("Register error:", error);
+
     return res.status(500).json({ message: "Server error" });
+
   }
+
 });
  
 // =====================
-// ✅ GET USER (بدون أي شيء بعد الرابط)
+
+// ✅ GET USERS (كل المستخدمين)
+
+// ✅ /getUsers بدون token وبدون parameters
+
 // =====================
-app.get("/getUser", async (req, res) => {
+
+app.get("/getUsers", async (req, res) => {
+
   try {
-    // ✅ يرجّع آخر مستخدم في الداتابيس
-    const user = await UserModel.findOne().sort({ _id: -1 }).select("-password");
+
+    const users = await UserModel.find()
+
+      .select("-password")
+
+      .sort({ uname: 1 });
  
-    if (!user) return res.status(404).json({ message: "No users found" });
- 
-    return res.status(200).json({ user });
+    return res.status(200).json({ users });
+
   } catch (error) {
-    console.error("getUser error:", error);
+
+    console.error("getUsers error:", error);
+
     return res.status(500).json({ message: "Server error" });
+
   }
+
 });
  
 // =====================
+
 // ✅ UPDATE PROFILE
+
 // =====================
+
 app.put("/user/profile", async (req, res) => {
+
   try {
+
     const { currentEmail, uname, email, phone, pic } = req.body;
  
     if (!currentEmail)
+
       return res.status(400).json({ message: "Current email is required." });
  
     const user = await UserModel.findOne({ email: currentEmail });
+
     if (!user) return res.status(404).json({ message: "User not found." });
  
+    // تغيير الإيميل (اختياري)
+
     if (email && email !== currentEmail) {
+
       const existing = await UserModel.findOne({ email });
-      if (existing)
-        return res.status(400).json({ message: "This email is already in use by another account." });
+
+      if (existing) {
+
+        return res.status(400).json({
+
+          message: "This email is already in use by another account.",
+
+        });
+
+      }
+
       user.email = email;
+
     }
  
     if (uname !== undefined) user.uname = uname;
+
     if (phone !== undefined) user.phone = phone;
+
     if (pic !== undefined) user.profilepic = pic;
  
     await user.save();
  
     const safeUser = {
+
       _id: user._id,
+
       uname: user.uname,
+
       email: user.email,
+
       profilepic: user.profilepic,
+
       phone: user.phone,
+
       adminFlag: user.adminFlag,
+
     };
  
-    return res.status(200).json({ message: "Profile updated successfully.", user: safeUser });
+    return res.status(200).json({
+
+      message: "Profile updated successfully.",
+
+      user: safeUser,
+
+    });
+
   } catch (err) {
+
     console.error("Error updating profile:", err);
+
     return res.status(500).json({ message: "Error updating profile." });
+
   }
+
 });
  
 // =====================
+
 // ✅ CHANGE PASSWORD
+
 // =====================
+
 app.put("/user/password", async (req, res) => {
+
   try {
+
     const { email, currentPassword, newPassword } = req.body;
  
-    if (!email || !currentPassword || !newPassword)
-      return res.status(400).json({ message: "Email, current password and new password are required." });
+    if (!email || !currentPassword || !newPassword) {
+
+      return res.status(400).json({
+
+        message: "Email, current password and new password are required.",
+
+      });
+
+    }
  
     const user = await UserModel.findOne({ email });
+
     if (!user) return res.status(404).json({ message: "User not found." });
  
     const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect." });
+
+    if (!isMatch)
+
+      return res.status(400).json({ message: "Current password is incorrect." });
  
     user.password = await bcrypt.hash(newPassword, 10);
+
     await user.save();
  
     return res.status(200).json({ message: "Password changed successfully." });
+
   } catch (err) {
+
     console.error("Error changing password:", err);
+
     return res.status(500).json({ message: "Error changing password." });
+
   }
+
 });
  
-// =====================
-// ✅ PLACES
-// =====================
-app.get("/places", async (req, res) => {
-  try {
-    const places = await PlaceModel.find({ isActive: true }).sort({ name: 1 });
-    return res.status(200).json(places);
-  } catch (err) {
-    console.error("Error fetching places:", err);
-    return res.status(500).json({ message: "Error fetching places." });
-  }
-});
  
 // =====================
-// ✅ DELEGATES
+
+// ✅ GET DELEGATES (كل المندوبين)
+
+// ✅ /getDelegates بدون token وبدون parameters
+
 // =====================
-app.get("/delegates", async (req, res) => {
+
+app.get("/getDelegates", async (req, res) => {
+
   try {
+
     const delegates = await DelegateModel.find().sort({ name: 1 });
-    return res.status(200).json(delegates);
+
+    return res.status(200).json({ delegates });
+
   } catch (err) {
+
     console.error("Error fetching delegates:", err);
+
     return res.status(500).json({ message: "Error fetching delegates." });
+
   }
+
 });
  
-app.get("/delegates/:placeName", async (req, res) => {
-  try {
-    const { placeName } = req.params;
-    const delegates = await DelegateModel.find({ place: placeName }).sort({ fee: 1 });
-    return res.status(200).json(delegates);
-  } catch (err) {
-    console.error("Error fetching delegates:", err);
-    return res.status(500).json({ message: "Error fetching delegates." });
-  }
+// =====================
+
+// ✅ Health Check (اختياري)
+
+// =====================
+
+app.get("/", (req, res) => {
+
+  res.send("OnTheWay API is running ✅");
+
 });
+
+ 
