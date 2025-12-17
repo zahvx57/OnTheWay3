@@ -11,9 +11,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// =====================
-// ✅ Start Server
-// =====================
 const startServer = async () => {
   try {
     const conStr =
@@ -30,9 +27,6 @@ const startServer = async () => {
 };
 startServer();
 
-// =====================
-// ✅ LOGIN
-// =====================
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,9 +56,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ REGISTER
-// =====================
 app.post("/register", async (req, res) => {
   try {
     const { uname, email, password, profilepic, phone } = req.body;
@@ -94,10 +85,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ GET USERS (كل المستخدمين)
-// ✅ /getUsers بدون token وبدون parameters
-// =====================
 app.get("/getUsers", async (req, res) => {
   try {
     const users = await UserModel.find().select("-password").sort({ uname: 1 });
@@ -108,9 +95,6 @@ app.get("/getUsers", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ UPDATE PROFILE
-// =====================
 app.put("/user/profile", async (req, res) => {
   try {
     const { currentEmail, uname, email, phone, pic } = req.body;
@@ -121,7 +105,6 @@ app.put("/user/profile", async (req, res) => {
     const user = await UserModel.findOne({ email: currentEmail });
     if (!user) return res.status(404).json({ message: "User not found." });
 
-    // تغيير الإيميل (اختياري)
     if (email && email !== currentEmail) {
       const existing = await UserModel.findOne({ email });
       if (existing) {
@@ -157,9 +140,6 @@ app.put("/user/profile", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ CHANGE PASSWORD
-// =====================
 app.put("/user/password", async (req, res) => {
   try {
     const { email, currentPassword, newPassword } = req.body;
@@ -187,10 +167,6 @@ app.put("/user/password", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ GET PLACES (كل المناطق)
-// ✅ /getPlaces بدون token وبدون parameters
-// =====================
 app.get("/getPlaces", async (req, res) => {
   try {
     const places = await PlaceModel.find().sort({ name: 1 });
@@ -201,9 +177,16 @@ app.get("/getPlaces", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ ADD PLACE (إضافة منطقة) — بدون تغيير شيء عندك
-// =====================
+app.get("/places", async (req, res) => {
+  try {
+    const places = await PlaceModel.find().sort({ name: 1 });
+    return res.status(200).json(places);
+  } catch (err) {
+    console.error("Error fetching places:", err);
+    return res.status(500).json({ message: "Error fetching places." });
+  }
+});
+
 app.post("/addPlace", async (req, res) => {
   try {
     const { name, city } = req.body;
@@ -227,11 +210,6 @@ app.post("/addPlace", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ ADMIN UPDATE PLACE (نفس الرابط اللي تستخدمه في Home)
-// PUT /admin/place/:id
-// body: { email, name, city }
-// =====================
 app.put("/admin/place/:id", async (req, res) => {
   try {
     const { email, name, city } = req.body;
@@ -250,9 +228,16 @@ app.put("/admin/place/:id", async (req, res) => {
     const place = await PlaceModel.findById(req.params.id);
     if (!place) return res.status(404).json({ message: "Place not found." });
 
-    place.name = name.trim();
+    const oldName = place.name;
+    const newName = name.trim();
+
+    place.name = newName;
     place.city = city || "";
     await place.save();
+
+    if (oldName !== newName) {
+      await DelegateModel.updateMany({ place: oldName }, { $set: { place: newName } });
+    }
 
     return res.status(200).json({ message: "Updated", place });
   } catch (err) {
@@ -261,11 +246,6 @@ app.put("/admin/place/:id", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ ADMIN DELETE PLACE (نفس الرابط اللي تستخدمه في Home)
-// DELETE /admin/place/:id
-// body: { email }
-// =====================
 app.delete("/admin/place/:id", async (req, res) => {
   try {
     const { email } = req.body;
@@ -277,6 +257,11 @@ app.delete("/admin/place/:id", async (req, res) => {
       return res.status(403).json({ message: "Admin only." });
     }
 
+    const place = await PlaceModel.findById(req.params.id);
+    if (place?.name) {
+      await DelegateModel.deleteMany({ place: place.name });
+    }
+
     await PlaceModel.findByIdAndDelete(req.params.id);
     return res.status(200).json({ message: "Deleted" });
   } catch (err) {
@@ -285,10 +270,6 @@ app.delete("/admin/place/:id", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ GET DELEGATES (كل المندوبين)
-// ✅ /getDelegates بدون token وبدون parameters
-// =====================
 app.get("/getDelegates", async (req, res) => {
   try {
     const delegates = await DelegateModel.find().sort({ name: 1 });
@@ -299,9 +280,19 @@ app.get("/getDelegates", async (req, res) => {
   }
 });
 
-// =====================
-// ✅ Health Check (اختياري)
-// =====================
+app.get("/delegates/:placeName", async (req, res) => {
+  try {
+    const placeName = decodeURIComponent(req.params.placeName || "").trim();
+    if (!placeName) return res.status(200).json([]);
+
+    const delegates = await DelegateModel.find({ place: placeName }).sort({ fee: 1, createdAt: -1 });
+    return res.status(200).json(delegates);
+  } catch (err) {
+    console.error("Error fetching delegates:", err);
+    return res.status(500).json({ message: "Error fetching delegates." });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("OnTheWay API is running ✅");
 });
