@@ -6,7 +6,7 @@ export const getUser = createAsyncThunk(
   "users/getUser",
   async (udata, thunkAPI) => {
     try {
-      const response = await axios.post("http://localhost:5000/login", udata);
+      const response = await axios.post("https://ontheway8.onrender.com/login", udata);
       return response.data; // { user, message }
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -21,7 +21,7 @@ export const addUser = createAsyncThunk(
   "users/addUser",
   async (udata, thunkAPI) => {
     try {
-      const response = await axios.post("http://localhost:5000/register", udata);
+      const response = await axios.post("https://ontheway8.onrender.com/register", udata);
       return response.data.message;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -31,13 +31,13 @@ export const addUser = createAsyncThunk(
   }
 );
 
-// ✅ Update profile (يستخدم endpoint الموجود عندك)
+
 export const updateProfile = createAsyncThunk(
   "users/updateProfile",
   async (payload, thunkAPI) => {
     try {
       // payload: { currentEmail, uname, pic }
-      const res = await axios.put("http://localhost:5000/user/profile", payload);
+      const res = await axios.put("https://ontheway8.onrender.com/user/profile", payload);
       return res.data; // { message, user }
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -47,13 +47,12 @@ export const updateProfile = createAsyncThunk(
   }
 );
 
-// ✅ Change password (يستخدم endpoint الموجود عندك)
 export const changePassword = createAsyncThunk(
   "users/changePassword",
   async (payload, thunkAPI) => {
     try {
       // payload: { email, currentPassword, newPassword }
-      const res = await axios.put("http://localhost:5000/user/password", payload);
+      const res = await axios.put("https://ontheway8.onrender.com/user/password", payload);
       return res.data; // { message }
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -167,3 +166,4 @@ export const UserSlice = createSlice({
 
 export const { logout, clearMessage } = UserSlice.actions;
 export default UserSlice.reducer;
+
