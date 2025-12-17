@@ -293,6 +293,69 @@ app.get("/delegates/:placeName", async (req, res) => {
   }
 });
 
+app.put("/admin/delegate/:id", async (req, res) => {
+  try {
+    const { email, name, phone, fee, place } = req.body;
+
+    if (!email) return res.status(400).json({ message: "Email is required." });
+
+    const adminUser = await UserModel.findOne({ email });
+    if (!adminUser || adminUser.adminFlag !== "Y") {
+      return res.status(403).json({ message: "Admin only." });
+    }
+
+    if (!name || !String(name).trim())
+      return res.status(400).json({ message: "Name is required." });
+
+    if (!phone || !String(phone).trim())
+      return res.status(400).json({ message: "Phone is required." });
+
+    if (fee === undefined || fee === null || String(fee).trim() === "")
+      return res.status(400).json({ message: "Fee is required." });
+
+    if (!place || !String(place).trim())
+      return res.status(400).json({ message: "Place is required." });
+
+    const delegate = await DelegateModel.findById(req.params.id);
+    if (!delegate) return res.status(404).json({ message: "Delegate not found." });
+
+    delegate.name = String(name).trim();
+    delegate.phone = String(phone).trim();
+    delegate.fee = Number(fee);
+    delegate.place = String(place).trim();
+
+    await delegate.save();
+
+    return res.status(200).json({ message: "Updated", delegate });
+  } catch (err) {
+    console.error("Error updating delegate:", err);
+    return res.status(500).json({ message: "Error updating delegate." });
+  }
+});
+
+app.delete("/admin/delegate/:id", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({ message: "Email is required." });
+
+    const adminUser = await UserModel.findOne({ email });
+    if (!adminUser || adminUser.adminFlag !== "Y") {
+      return res.status(403).json({ message: "Admin only." });
+    }
+
+    const delegate = await DelegateModel.findById(req.params.id);
+    if (!delegate) return res.status(404).json({ message: "Delegate not found." });
+
+    await DelegateModel.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({ message: "Deleted" });
+  } catch (err) {
+    console.error("Error deleting delegate:", err);
+    return res.status(500).json({ message: "Error deleting delegate." });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("OnTheWay API is running ✅");
 });
