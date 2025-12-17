@@ -1,293 +1,109 @@
-// src/features/UserSlice.js
-
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
 import axios from "axios";
  
 const API = "https://ontheway8.onrender.com";
  
 // ✅ Login
-
 export const getUser = createAsyncThunk("users/login", async (udata, thunkAPI) => {
-
   try {
-
     const res = await axios.post(`${API}/login`, udata);
-
-    // لازم يكون فيه user
-
     if (!res.data?.user) {
-
       return thunkAPI.rejectWithValue({ message: res.data?.message || "Login failed" });
-
     }
-
     return res.data; // { user, message }
-
-  } catch (error) {
-
-    return thunkAPI.rejectWithValue(error.response?.data || { message: "Login failed" });
-
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data || { message: "Login failed" });
   }
-
+});
+ 
+// ✅ Get user from /getUser (بدون أي باراميتر)
+export const fetchUser = createAsyncThunk("users/fetchUser", async (_, thunkAPI) => {
+  try {
+    const res = await axios.get(`${API}/getUser`);
+    return res.data; // { user }
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data || { message: "Fetch user failed" });
+  }
 });
  
 // ✅ Register
-
 export const addUser = createAsyncThunk("users/register", async (udata, thunkAPI) => {
-
   try {
-
     const res = await axios.post(`${API}/register`, udata);
-
     return res.data; // { message }
-
-  } catch (error) {
-
-    return thunkAPI.rejectWithValue(error.response?.data || { message: "Register failed" });
-
+  } catch (err) {
+    return thunkAPI.rejectWithValue(err.response?.data || { message: "Register failed" });
   }
-
-});
- 
-export const updateProfile = createAsyncThunk("users/updateProfile", async (payload, thunkAPI) => {
-
-  try {
-
-    const res = await axios.put(`${API}/user/profile`, payload);
-
-    return res.data; // { message, user }
-
-  } catch (error) {
-
-    return thunkAPI.rejectWithValue(error.response?.data || { message: "Update profile failed" });
-
-  }
-
-});
- 
-export const changePassword = createAsyncThunk("users/changePassword", async (payload, thunkAPI) => {
-
-  try {
-
-    const res = await axios.put(`${API}/user/password`, payload);
-
-    return res.data; // { message }
-
-  } catch (error) {
-
-    return thunkAPI.rejectWithValue(error.response?.data || { message: "Change password failed" });
-
-  }
-
 });
  
 const initVal = {
-
-  user: JSON.parse(localStorage.getItem("user") || "null"), // null أفضل من {}
-
+  user: JSON.parse(localStorage.getItem("user") || "null"),
   message: "",
-
   isLoading: false,
-
   isSuccess: false,
-
   isError: false,
-
 };
  
 const UserSlice = createSlice({
-
   name: "users",
-
   initialState: initVal,
-
   reducers: {
-
     logout: (state) => {
-
       state.user = null;
-
       state.message = "";
-
       state.isLoading = false;
-
       state.isSuccess = false;
-
       state.isError = false;
-
       localStorage.removeItem("user");
-
     },
-
     clearMessage: (state) => {
-
       state.message = "";
-
       state.isSuccess = false;
-
       state.isError = false;
-
     },
-
   },
-
   extraReducers: (builder) => {
-
     builder
-
-      // register
-
-      .addCase(addUser.pending, (state) => {
-
-        state.isLoading = true;
-
-        state.isSuccess = false;
-
-        state.isError = false;
-
-        state.message = "";
-
-      })
-
-      .addCase(addUser.fulfilled, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isSuccess = true;
-
-        state.message = action.payload?.message || "Registered ✅";
-
-      })
-
-      .addCase(addUser.rejected, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isError = true;
-
-        state.message = action.payload?.message || "Register failed";
-
-      })
- 
       // login
-
-      .addCase(getUser.pending, (state) => {
-
-        state.isLoading = true;
-
-        state.isSuccess = false;
-
-        state.isError = false;
-
-        state.message = "";
-
+      .addCase(getUser.pending, (s) => {
+        s.isLoading = true;
+        s.isError = false;
+        s.isSuccess = false;
+        s.message = "";
       })
-
-      .addCase(getUser.fulfilled, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isSuccess = true;
-
-        state.isError = false;
-
-        state.message = action.payload?.message || "Success";
-
-        state.user = action.payload?.user || null;
-
-        localStorage.setItem("user", JSON.stringify(state.user));
-
+      .addCase(getUser.fulfilled, (s, a) => {
+        s.isLoading = false;
+        s.isSuccess = true;
+        s.user = a.payload.user;
+        s.message = a.payload.message || "Success";
+        localStorage.setItem("user", JSON.stringify(s.user));
       })
-
-      .addCase(getUser.rejected, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isSuccess = false;
-
-        state.isError = true;
-
-        state.user = null;
-
-        state.message = action.payload?.message || "Login failed";
-
+      .addCase(getUser.rejected, (s, a) => {
+        s.isLoading = false;
+        s.isError = true;
+        s.user = null;
+        s.message = a.payload?.message || "Login failed";
       })
  
-      // updateProfile
-
-      .addCase(updateProfile.pending, (state) => {
-
-        state.isLoading = true;
-
-        state.isSuccess = false;
-
-        state.isError = false;
-
+      // fetchUser (/getUser)
+      .addCase(fetchUser.pending, (s) => {
+        s.isLoading = true;
+        s.isError = false;
+        s.isSuccess = false;
       })
-
-      .addCase(updateProfile.fulfilled, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isSuccess = true;
-
-        state.message = action.payload?.message || "Profile updated ✅";
-
-        state.user = action.payload?.user || state.user;
-
-        localStorage.setItem("user", JSON.stringify(state.user));
-
+      .addCase(fetchUser.fulfilled, (s, a) => {
+        s.isLoading = false;
+        s.isSuccess = true;
+        s.user = a.payload.user;
+        localStorage.setItem("user", JSON.stringify(s.user));
       })
-
-      .addCase(updateProfile.rejected, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isError = true;
-
-        state.message = action.payload?.message || "Update failed";
-
-      })
- 
-      // changePassword
-
-      .addCase(changePassword.pending, (state) => {
-
-        state.isLoading = true;
-
-        state.isSuccess = false;
-
-        state.isError = false;
-
-      })
-
-      .addCase(changePassword.fulfilled, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isSuccess = true;
-
-        state.message = action.payload?.message || "Password changed ✅";
-
-      })
-
-      .addCase(changePassword.rejected, (state, action) => {
-
-        state.isLoading = false;
-
-        state.isError = true;
-
-        state.message = action.payload?.message || "Password change failed";
-
+      .addCase(fetchUser.rejected, (s, a) => {
+        s.isLoading = false;
+        s.isError = true;
+        s.message = a.payload?.message || "Fetch user failed";
       });
-
   },
-
 });
  
 export const { logout, clearMessage } = UserSlice.actions;
-
 export default UserSlice.reducer;
-
- 
