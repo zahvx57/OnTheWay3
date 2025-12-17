@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
  
-const API = "https://ontheway8.onrender.com";
+const API = "https://ontheway10.onrender.com";
  
 // ✅ Login
 export const getUser = createAsyncThunk("users/login", async (udata, thunkAPI) => {
@@ -107,3 +107,4 @@ const UserSlice = createSlice({
  
 export const { logout, clearMessage } = UserSlice.actions;
 export default UserSlice.reducer;
+
