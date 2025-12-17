@@ -189,7 +189,18 @@ app.get("/places", async (req, res) => {
 
 app.post("/addPlace", async (req, res) => {
   try {
-    const { name, city } = req.body;
+    const { name, city, email, adminFlag } = req.body;
+
+    let isAdmin = false;
+
+    if (email) {
+      const adminUser = await UserModel.findOne({ email });
+      isAdmin = !!adminUser && adminUser.adminFlag === "Y";
+    } else if (adminFlag) {
+      isAdmin = adminFlag === "Y";
+    }
+
+    if (!isAdmin) return res.status(403).json({ message: "Admin only." });
 
     if (!name || !name.trim())
       return res.status(400).json({ message: "Place name is required." });
@@ -203,7 +214,9 @@ app.post("/addPlace", async (req, res) => {
     });
 
     await newPlace.save();
-    return res.status(200).json({ message: "Place added successfully.", place: newPlace });
+
+    const places = await PlaceModel.find().sort({ name: 1 });
+    return res.status(200).json({ message: "Place added successfully.", places });
   } catch (err) {
     console.error("Error adding place:", err);
     return res.status(500).json({ message: "Error adding place." });
@@ -290,6 +303,54 @@ app.get("/delegates/:placeName", async (req, res) => {
   } catch (err) {
     console.error("Error fetching delegates:", err);
     return res.status(500).json({ message: "Error fetching delegates." });
+  }
+});
+
+app.post("/addDelegate", async (req, res) => {
+  try {
+    const { name, phone, fee, place, email, adminFlag, avatar } = req.body;
+
+    let isAdmin = false;
+
+    if (email) {
+      const adminUser = await UserModel.findOne({ email });
+      isAdmin = !!adminUser && adminUser.adminFlag === "Y";
+    } else if (adminFlag) {
+      isAdmin = adminFlag === "Y";
+    }
+
+    if (!isAdmin) return res.status(403).json({ message: "Admin only." });
+
+    if (!name || !String(name).trim())
+      return res.status(400).json({ message: "Name is required." });
+
+    if (!phone || !String(phone).trim())
+      return res.status(400).json({ message: "Phone is required." });
+
+    if (fee === undefined || fee === null || String(fee).trim() === "")
+      return res.status(400).json({ message: "Fee is required." });
+
+    if (!place || !String(place).trim())
+      return res.status(400).json({ message: "Place is required." });
+
+    const placeExists = await PlaceModel.findOne({ name: String(place).trim() });
+    if (!placeExists) return res.status(404).json({ message: "Place not found." });
+
+    const newDelegate = new DelegateModel({
+      name: String(name).trim(),
+      phone: String(phone).trim(),
+      fee: Number(fee),
+      place: String(place).trim(),
+      avatar: avatar || "",
+    });
+
+    await newDelegate.save();
+
+    const delegates = await DelegateModel.find().sort({ name: 1 });
+    return res.status(200).json({ message: "Delegate added successfully.", delegates });
+  } catch (err) {
+    console.error("Error adding delegate:", err);
+    return res.status(500).json({ message: "Error adding delegate." });
   }
 });
 
