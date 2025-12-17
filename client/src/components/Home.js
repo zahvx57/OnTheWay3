@@ -11,7 +11,7 @@ import {
 } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchPlaces } from "../features/PlaceSlice";
+import { fetchPlaces } from "../features/PlacesSlice";
 import { addFavorite } from "../features/FavoriteSlice";
 
 const Home = () => {
@@ -98,3 +98,4 @@ const Home = () => {
 };
 
 export default Home;
+
