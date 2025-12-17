@@ -1,21 +1,13 @@
 import React, { useEffect, useMemo } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  CardBody,
-  CardText,
-  Button,
-} from "reactstrap";
+import { Container, Row, Col, Card, CardBody, CardText, Button } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeFavorite, clearFavorites } from "../features/FavoriteSlice";
 
 const Favorite = () => {
   const email = useSelector((state) => state.users?.user?.email);
-  const favorites = useSelector((state) => state.favorites?.list || []);
-  const theme = useSelector((state) => state.theme?.mode || "light"); 
+  const favorites = useSelector((state) => state.favorite?.favorites || []);
+  const theme = useSelector((state) => state.theme?.mode || "light");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -24,7 +16,6 @@ const Favorite = () => {
     if (!email) navigate("/");
   }, [email, navigate]);
 
- 
   const styles = useMemo(() => {
     const isDark = theme === "dark";
     return {
@@ -59,23 +50,36 @@ const Favorite = () => {
         padding: "16px 24px",
         borderRadius: "14px",
         textAlign: "center",
-        border: isDark
-          ? "1px solid rgba(255,255,255,0.08)"
-          : "1px solid #e5e7eb",
+        border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb",
         boxShadow: isDark
           ? "0 10px 30px rgba(0,0,0,0.35)"
           : "0 10px 25px rgba(0,0,0,0.08)",
         fontSize: "14px",
       },
-      avatar: {
+      avatarWrap: {
         width: "64px",
         height: "64px",
         borderRadius: "50%",
-        objectFit: "cover",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         marginRight: "16px",
-        border: isDark
+        border: theme === "dark"
           ? "2px solid rgba(255,255,255,0.12)"
           : "2px solid rgba(0,0,0,0.06)",
+        background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+        overflow: "hidden",
+        flexShrink: 0,
+      },
+      avatar: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+      },
+      initials: {
+        fontWeight: 900,
+        letterSpacing: "0.6px",
+        color: isDark ? "#e5e7eb" : "#111827",
       },
       infoTitle: {
         marginBottom: "4px",
@@ -101,10 +105,18 @@ const Favorite = () => {
     };
   }, [theme]);
 
+  const getInitials = (txt = "") => {
+    const s = String(txt).trim();
+    if (!s) return "★";
+    const parts = s.split(" ").filter(Boolean);
+    const first = parts[0]?.[0] || "";
+    const second = parts[1]?.[0] || "";
+    return (first + second).toUpperCase();
+  };
+
   return (
     <div className="ontheway-page" style={styles.page}>
       <Container className="ontheway-wrapper">
-        {/* Title */}
         <Row className="mt-4">
           <Col xs="12" className="text-center">
             <h2 className="ontheway-title" style={styles.title}>
@@ -116,7 +128,6 @@ const Favorite = () => {
           </Col>
         </Row>
 
-       
         {favorites.length > 0 && (
           <Row className="mt-3">
             <Col className="text-center">
@@ -132,7 +143,6 @@ const Favorite = () => {
           </Row>
         )}
 
-       
         <Row className="justify-content-center mt-4">
           <Col md="10" lg="8">
             {favorites.length === 0 ? (
@@ -140,39 +150,52 @@ const Favorite = () => {
                 No favorites yet. Go to a place and add some delegates ⭐
               </div>
             ) : (
-              favorites.map((fav) => (
-                <Card key={fav.id} className="mb-3" style={styles.card}>
-                  <CardBody className="d-flex align-items-center">
-                    <img
-                      src={fav.avatar}
-                      alt={fav.name}
-                      style={styles.avatar}
-                    />
+              favorites.map((fav) => {
+                const key = fav.favId || fav.id;
+                const img = fav.pic || fav.avatar || "";
+                return (
+                  <Card key={key} className="mb-3" style={styles.card}>
+                    <CardBody className="d-flex align-items-center">
+                      <div style={styles.avatarWrap}>
+                        {img ? (
+                          <img src={img} alt={fav.name} style={styles.avatar} />
+                        ) : (
+                          <div style={styles.initials}>{getInitials(fav.name)}</div>
+                        )}
+                      </div>
 
-                    <div style={{ flex: 1 }}>
-                      <h5 style={styles.infoTitle}>{fav.name}</h5>
-                      <CardText style={styles.infoText}>
-                        📍 {fav.placeName}
-                      </CardText>
-                      <CardText style={styles.infoText}>
-                        📞 {fav.phone}
-                      </CardText>
-                      <CardText style={styles.feeText}>
-                        💰 {fav.fee}
-                      </CardText>
-                    </div>
+                      <div style={{ flex: 1 }}>
+                        <h5 style={styles.infoTitle}>{fav.name}</h5>
 
-                    <Button
-                      color="secondary"
-                      size="sm"
-                      style={styles.removeBtn}
-                      onClick={() => dispatch(removeFavorite(fav.id))}
-                    >
-                      Remove
-                    </Button>
-                  </CardBody>
-                </Card>
-              ))
+                        {fav.placeName && (
+                          <CardText style={styles.infoText}>📍 {fav.placeName}</CardText>
+                        )}
+
+                        {fav.city && (
+                          <CardText style={styles.infoText}>📍 {fav.city}</CardText>
+                        )}
+
+                        {fav.phone && (
+                          <CardText style={styles.infoText}>📞 {fav.phone}</CardText>
+                        )}
+
+                        {fav.fee != null && fav.fee !== "" && (
+                          <CardText style={styles.feeText}>💰 {fav.fee}</CardText>
+                        )}
+                      </div>
+
+                      <Button
+                        color="secondary"
+                        size="sm"
+                        style={styles.removeBtn}
+                        onClick={() => dispatch(removeFavorite(key))}
+                      >
+                        Remove
+                      </Button>
+                    </CardBody>
+                  </Card>
+                );
+              })
             )}
           </Col>
         </Row>
