@@ -1,110 +1,129 @@
-import {Container,Row,Col, FormGroup, Label, Button} from 'reactstrap';
-import Logo from '../assets/logo.png';
-import { UserRegisterSchemaValidation } from '../validations/UserRegisterSchemaValidation';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
-import { addUser } from '../features/UserSlice';
-import {useDispatch,useSelector} from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+// src/components/Register.js
 
-const Register=()=>{
+import { Container, Row, Col, FormGroup, Label, Input, Button } from "reactstrap";
 
-    let [email,setEmail]=useState('');
-    let [password,setPassword]=useState('');
-    let [uname,setuname]=useState('');
-    let [pic,setPic]=useState('');
-    const dispatch=useDispatch();
-    const message=useSelector((state)=>state.users.message);
-    const navigate=useNavigate();
+import Logo from "../assets/logo.png";
 
-    //Validation Configuration
-    const {
-        register,
-        handleSubmit:submitForm,
-        formState:{errors}
-    } = useForm({resolver:yupResolver(UserRegisterSchemaValidation)});
+import { UserRegisterSchemaValidation } from "../validations/UserRegisterSchemaValidation";
 
-    const validate = ()=>{
-        const data={
-            uname:uname,
-            email:email,
-            password:password,
-            profilepic:pic
-        }
-        dispatch(addUser(data));
-        navigate("/");
+import { useForm } from "react-hook-form";
+
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import { addUser, clearMessage } from "../features/UserSlice";
+
+import { useDispatch, useSelector } from "react-redux";
+
+import { useEffect } from "react";
+
+import { useNavigate } from "react-router-dom";
+ 
+const Register = () => {
+
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+ 
+  const { isLoading, isSuccess, isError, message } = useSelector((s) => s.users);
+ 
+  const {
+
+    register,
+
+    handleSubmit,
+
+    formState: { errors },
+
+  } = useForm({ resolver: yupResolver(UserRegisterSchemaValidation) });
+ 
+  const onSubmit = (data) => {
+
+    // خليها مثل ما السيرفر يتوقع: profilepic
+
+    const payload = {
+
+      uname: data.uname,
+
+      email: data.email,
+
+      password: data.password,
+
+      profilepic: data.pic,
+
+    };
+
+    dispatch(addUser(payload));
+
+  };
+ 
+  useEffect(() => {
+
+    if (isSuccess && message) {
+
+      // نجاح التسجيل
+
+      navigate("/");
+
+      dispatch(clearMessage());
+
     }
 
-    return(
-        <div>
-            <Container fluid>
-                <Row className='div-row'>
-                    <Col md='6' className='div-col'>
-                        <form className='div-form'>
-                            <div>
-                                <img alt='Logo' className='img-fluid rounded mx-auto d-block' src={Logo}></img>
-                            </div>
-                            <FormGroup>
-                                <Label>UserName:</Label>
-                                <input
-                                 {...register('uname',{
-                                    value:uname,
-                                    onChange:(e)=>setuname(e.target.value)
-                                 })}
-                                 placeholder='Please Enter your username here...'
-                                 type='text' className='form-control'/>
-                                 <p style={{color:'red'}}>{errors.uname?.message}</p>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label>Profile Picture:</Label>
-                                <input
-                                 {...register('pic',{
-                                    value:pic,
-                                    onChange:(e)=>setPic(e.target.value)
-                                 })}
-                                 placeholder='Please Enter your Profile picture here...'
-                                 type='text' className='form-control'/>
-                                 <p style={{color:'red'}}>{errors.pic?.message}</p>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label>Email:</Label>
-                                <input
-                                 {...register('email',{
-                                    value:email,
-                                    onChange:(e)=>setEmail(e.target.value)
-                                 })}
-                                 placeholder='Please Enter your Email here...'
-                                 type='email' className='form-control'/>
-                                 <p style={{color:'red'}}>{errors.email?.message}</p>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label>Password:</Label>
-                                <input 
-                                {...register('password',{
-                                    value:password,
-                                    onChange:(e)=>setPassword(e.target.value)
-                                })}
-                                placeholder='Please Enter your Password here...' 
-                                type='password' className='form-control'/>
-                                <p style={{color:'red'}}>{errors.password?.message}</p>
-                            </FormGroup>
-                            <FormGroup>
-                                <Button 
-                                onClick={submitForm(validate)}
-                                className='form-control' 
-                                color='dark'>
-                                Sign In</Button>
-                            </FormGroup>
-                            <FormGroup>
-                                <p>{message}</p>
-                            </FormGroup>
-                        </form>
-                    </Col>
-                </Row>
-            </Container>
-        </div>
-    );
-}
+  }, [isSuccess, message, navigate, dispatch]);
+ 
+  return (
+<div>
+<Container fluid>
+<Row className="div-row">
+<Col md="6" className="div-col">
+<form className="div-form" onSubmit={handleSubmit(onSubmit)}>
+<div>
+<img alt="Logo" className="img-fluid rounded mx-auto d-block" src={Logo} />
+</div>
+ 
+              <FormGroup>
+<Label>UserName:</Label>
+<Input {...register("uname")} placeholder="Please Enter your username..." />
+<p style={{ color: "red" }}>{errors.uname?.message}</p>
+</FormGroup>
+ 
+              <FormGroup>
+<Label>Profile Picture:</Label>
+<Input {...register("pic")} placeholder="Please Enter profile picture link..." />
+<p style={{ color: "red" }}>{errors.pic?.message}</p>
+</FormGroup>
+ 
+              <FormGroup>
+<Label>Email:</Label>
+<Input {...register("email")} type="email" placeholder="Please Enter your Email..." />
+<p style={{ color: "red" }}>{errors.email?.message}</p>
+</FormGroup>
+ 
+              <FormGroup>
+<Label>Password:</Label>
+<Input {...register("password")} type="password" placeholder="Please Enter Password..." />
+<p style={{ color: "red" }}>{errors.password?.message}</p>
+</FormGroup>
+ 
+              {isError && <p style={{ color: "red" }}>{message}</p>}
+ 
+              <FormGroup>
+<Button type="submit" className="form-control" color="dark" disabled={isLoading}>
 
+                  {isLoading ? "Creating..." : "Sign Up"}
+</Button>
+</FormGroup>
+ 
+              {!isError && message && <p>{message}</p>}
+</form>
+</Col>
+</Row>
+</Container>
+</div>
+
+  );
+
+};
+ 
 export default Register;
+
+ 
