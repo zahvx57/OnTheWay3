@@ -41,7 +41,7 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    fetch("http://localhost:5000/places")
+    fetch("https://ontheway8.onrender.com/places")
       .then((res) => res.json())
       .then((data) => setPlaces(Array.isArray(data) ? data : []));
   }, []);
@@ -50,7 +50,7 @@ const Admin = () => {
     e.preventDefault();
     if (!placeName.trim()) return showMessage("Place name is required.");
 
-    const res = await fetch("http://localhost:5000/admin/place", {
+    const res = await fetch("https://ontheway8.onrender.com/admin/place", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name: placeName, city: placeCity }),
@@ -72,7 +72,7 @@ const Admin = () => {
     if (!delegateName || !delegatePhone || !delegateFee || !selectedPlaceName)
       return showMessage("Fill all required fields.");
 
-    const res = await fetch("http://localhost:5000/admin/delegate", {
+    const res = await fetch("https://ontheway8.onrender.com/admin/delegate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -201,3 +201,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
