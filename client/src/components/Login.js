@@ -7,88 +7,92 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getUser } from "../features/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
- 
+
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
- 
+
   const user = useSelector((state) => state.users.user);
   const isSuccess = useSelector((state) => state.users.isSuccess);
-  const isError = useSelector((state) => state.users.isError);
- 
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: yupResolver(UserSchemaValidation) });
- 
+  } = useForm({
+    resolver: yupResolver(UserSchemaValidation),
+    mode: "onSubmit",
+  });
+
+  // ✅ حل Reactstrap + RHF: innerRef
+  const { ref: emailRef, ...emailReg } = register("email");
+  const { ref: passRef, ...passReg } = register("password");
+
   const onSubmit = (data) => {
-    // data = { email, password }
     dispatch(getUser(data));
   };
- 
+
   useEffect(() => {
     if (user && isSuccess) navigate("/home");
-    // لا داعي تعمل navigate("/") عند isError لأنك أصلاً في صفحة /
   }, [user, isSuccess, navigate]);
- 
+
   return (
-<div>
-<Container fluid>
-<Row className="div-row">
-<Col md="6" className="div-col">
-            {/* ✅ خلي الفورم هو اللي يعمل submit */}
-<form className="div-form" onSubmit={handleSubmit(onSubmit)}>
-<div>
-<img alt="Logo" className="img-fluid rounded mx-auto d-block" src={Logo} />
-</div>
- 
+    <div>
+      <Container fluid>
+        <Row className="div-row">
+          <Col md="6" className="div-col">
+            <form className="div-form" onSubmit={handleSubmit(onSubmit)}>
+              <div>
+                <img alt="Logo" className="img-fluid rounded mx-auto d-block" src={Logo} />
+              </div>
+
               <FormGroup>
-<Label>Email</Label>
-<Input
-                  {...register("email")}
+                <Label>Email</Label>
+                <Input
+                  innerRef={emailRef}
+                  {...emailReg}
                   placeholder="Please Enter your Email here..."
                   type="email"
                 />
-<p style={{ color: "red" }}>{errors.email?.message}</p>
-</FormGroup>
- 
+                {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+              </FormGroup>
+
               <FormGroup>
-<Label>Password</Label>
-<Input
-                  {...register("password")}
+                <Label>Password</Label>
+                <Input
+                  innerRef={passRef}
+                  {...passReg}
                   placeholder="Please Enter your Password here..."
                   type="password"
                 />
-<p style={{ color: "red" }}>{errors.password?.message}</p>
-</FormGroup>
- 
+                {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
+              </FormGroup>
+
               <FormGroup>
-<Input type="checkbox" /> <Label>Remember Me</Label>
-</FormGroup>
- 
+                <Input type="checkbox" /> <Label>Remember Me</Label>
+              </FormGroup>
+
               <FormGroup>
-                {/* ✅ زر submit الحقيقي */}
-<Button type="submit" className="form-control" color="dark">
+                <Button type="submit" className="form-control" color="dark">
                   Sign In
-</Button>
-</FormGroup>
- 
+                </Button>
+              </FormGroup>
+
               <FormGroup className="text-center">
-<Label>Forget password</Label>
-</FormGroup>
- 
+                <Label>Forget password</Label>
+              </FormGroup>
+
               <FormGroup className="text-center">
-<Label>
+                <Label>
                   No Account? <Link to="/register">Sign Up Now...</Link>
-</Label>
-</FormGroup>
-</form>
-</Col>
-</Row>
-</Container>
-</div>
+                </Label>
+              </FormGroup>
+            </form>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
- 
+
 export default Login;
