@@ -11,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
  
+// ✅ Start Server
 const startServer = async () => {
   try {
     const conStr =
@@ -27,52 +28,50 @@ const startServer = async () => {
  
 startServer();
  
-const checkAdmin = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email is required for admin check." });
- 
-    const user = await UserModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found." });
- 
-    if (user.adminFlag !== "Y") return res.status(403).json({ message: "Not authorized. Admins only." });
- 
-    next();
-  } catch (err) {
-    console.error("Admin check error:", err);
-    res.status(500).json({ message: "Server error in admin check." });
-  }
-};
- 
-// ✅ LOGIN (مهم)
+// =====================
+// ✅ LOGIN
+// =====================
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
  
-    if (!email || !password) return res.status(400).json({ message: "Email and password are required." });
+    if (!email || !password)
+      return res.status(400).json({ message: "Email and password are required." });
  
     const user = await UserModel.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found..." });
  
-    const pwd_match = await bcrypt.compare(password, user.password);
-    if (!pwd_match) return res.status(401).json({ message: "Invalid Credentials.." });
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ message: "Invalid Credentials.." });
  
-    return res.status(200).json({ user, message: "Success" });
+    const safeUser = {
+      _id: user._id,
+      uname: user.uname,
+      email: user.email,
+      profilepic: user.profilepic,
+      phone: user.phone,
+      adminFlag: user.adminFlag,
+    };
+ 
+    return res.status(200).json({ user: safeUser, message: "Success" });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
  
+// =====================
 // ✅ REGISTER
+// =====================
 app.post("/register", async (req, res) => {
   try {
     const { uname, email, password, profilepic } = req.body;
  
-    if (!uname || !email || !password) return res.status(400).json({ message: "uname, email, password are required." });
+    if (!uname || !email || !password)
+      return res.status(400).json({ message: "uname, email, password are required." });
  
-    const existing = await UserModel.findOne({ email });
-    if (existing) return res.status(409).json({ message: "User already exists..." });
+    const exists = await UserModel.findOne({ email });
+    if (exists) return res.status(409).json({ message: "User already exists..." });
  
     const hash_password = await bcrypt.hash(password, 10);
  
@@ -81,29 +80,51 @@ app.post("/register", async (req, res) => {
       email,
       password: hash_password,
       profilepic: profilepic || "",
+      adminFlag: "N",
     });
  
     await new_user.save();
-    res.status(200).json({ message: "Success" });
+    return res.status(200).json({ message: "Success" });
   } catch (error) {
     console.error("Register error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
  
+// =====================
+// ✅ GET USER (بدون أي شيء بعد الرابط)
+// =====================
+app.get("/getUser", async (req, res) => {
+  try {
+    // ✅ يرجّع آخر مستخدم في الداتابيس
+    const user = await UserModel.findOne().sort({ _id: -1 }).select("-password");
+ 
+    if (!user) return res.status(404).json({ message: "No users found" });
+ 
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("getUser error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+ 
+// =====================
 // ✅ UPDATE PROFILE
+// =====================
 app.put("/user/profile", async (req, res) => {
   try {
     const { currentEmail, uname, email, phone, pic } = req.body;
  
-    if (!currentEmail) return res.status(400).json({ message: "Current email is required." });
+    if (!currentEmail)
+      return res.status(400).json({ message: "Current email is required." });
  
     const user = await UserModel.findOne({ email: currentEmail });
     if (!user) return res.status(404).json({ message: "User not found." });
  
     if (email && email !== currentEmail) {
       const existing = await UserModel.findOne({ email });
-      if (existing) return res.status(400).json({ message: "This email is already in use by another account." });
+      if (existing)
+        return res.status(400).json({ message: "This email is already in use by another account." });
       user.email = email;
     }
  
@@ -113,36 +134,11 @@ app.put("/user/profile", async (req, res) => {
  
     await user.save();
  
-    return res.status(200).json({ message: "Profile updated successfully.", user });
-  } catch (err) {
-    console.error("Error updating profile:", err);
-    res.status(500).json({ message: "Error updating profile." });
-  }
-});
- 
-// ✅ CHANGE PASSWORD
-app.put("/user/password", async (req, res) => {
-  try {
-    const { email, currentPassword, newPassword } = req.body;
- 
-    if (!email || !currentPassword || !newPassword) {
-      return res.status(400).json({ message: "Email, current password and new password are required." });
-    }
- 
-    const user = await UserModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found." });
- 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect." });
- 
-    const hashed = await bcrypt.hash(newPassword, 10);
-    user.password = hashed;
-    await user.save();
- 
-    return res.status(200).json({ message: "Password changed successfully." });
-  } catch (err) {
-    console.error("Error changing password:", err);
-    res.status(500).json({ message: "Error changing password." });
-  }
-});
- 
+    const safeUser = {
+      _id: user._id,
+      uname: user.uname,
+      email: user.email,
+      profilepic: user.profilepic,
+      phone: user.phone,
+      adminFlag: user.adminFlag,
+    };
