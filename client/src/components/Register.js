@@ -1,5 +1,3 @@
-// src/components/Register.js
-
 import { Container, Row, Col, FormGroup, Label, Input, Button } from "reactstrap";
 
 import Logo from "../assets/logo.png";
@@ -10,7 +8,7 @@ import { useForm } from "react-hook-form";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { addUser, clearMessage } from "../features/UserSlice";
+import { addUser } from "../features/UserSlice";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -23,7 +21,7 @@ const Register = () => {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
- 
+
   const { isLoading, isSuccess, isError, message } = useSelector((s) => s.users);
  
   const {
@@ -37,8 +35,6 @@ const Register = () => {
   } = useForm({ resolver: yupResolver(UserRegisterSchemaValidation) });
  
   const onSubmit = (data) => {
-
-    // خليها مثل ما السيرفر يتوقع: profilepic
 
     const payload = {
 
@@ -58,17 +54,9 @@ const Register = () => {
  
   useEffect(() => {
 
-    if (isSuccess && message) {
+    if (isSuccess && !isError && message) navigate("/");
 
-      // نجاح التسجيل
-
-      navigate("/");
-
-      dispatch(clearMessage());
-
-    }
-
-  }, [isSuccess, message, navigate, dispatch]);
+  }, [isSuccess, isError, message, navigate]);
  
   return (
 <div>
@@ -82,29 +70,31 @@ const Register = () => {
  
               <FormGroup>
 <Label>UserName:</Label>
-<Input {...register("uname")} placeholder="Please Enter your username..." />
+<Input {...register("uname")} placeholder="Enter username..." />
 <p style={{ color: "red" }}>{errors.uname?.message}</p>
 </FormGroup>
  
               <FormGroup>
 <Label>Profile Picture:</Label>
-<Input {...register("pic")} placeholder="Please Enter profile picture link..." />
+<Input {...register("pic")} placeholder="Enter profile picture link..." />
 <p style={{ color: "red" }}>{errors.pic?.message}</p>
 </FormGroup>
  
               <FormGroup>
 <Label>Email:</Label>
-<Input {...register("email")} type="email" placeholder="Please Enter your Email..." />
+<Input {...register("email")} type="email" placeholder="Enter email..." />
 <p style={{ color: "red" }}>{errors.email?.message}</p>
 </FormGroup>
  
               <FormGroup>
 <Label>Password:</Label>
-<Input {...register("password")} type="password" placeholder="Please Enter Password..." />
+<Input {...register("password")} type="password" placeholder="Enter password..." />
 <p style={{ color: "red" }}>{errors.password?.message}</p>
 </FormGroup>
  
               {isError && <p style={{ color: "red" }}>{message}</p>}
+
+              {!isError && message && <p>{message}</p>}
  
               <FormGroup>
 <Button type="submit" className="form-control" color="dark" disabled={isLoading}>
@@ -112,8 +102,6 @@ const Register = () => {
                   {isLoading ? "Creating..." : "Sign Up"}
 </Button>
 </FormGroup>
- 
-              {!isError && message && <p>{message}</p>}
 </form>
 </Col>
 </Row>
