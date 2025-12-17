@@ -6,7 +6,7 @@ import { removeFavorite, clearFavorites } from "../features/FavoriteSlice";
 
 const Favorite = () => {
   const email = useSelector((state) => state.users?.user?.email);
-  const favorites = useSelector((state) => state.favorite?.favorites || []);
+  const favorites = useSelector((state) => state.favorites?.list || []);
   const theme = useSelector((state) => state.theme?.mode || "light");
 
   const navigate = useNavigate();
@@ -151,7 +151,7 @@ const Favorite = () => {
               </div>
             ) : (
               favorites.map((fav) => {
-                const key = fav.favId || fav.id;
+                const key = fav.id ?? fav._id ?? fav.favId;
                 const img = fav.pic || fav.avatar || "";
                 return (
                   <Card key={key} className="mb-3" style={styles.card}>
