@@ -1,0 +1,219 @@
+
+body.light-mode {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body.light-mode .container-fluid,
+body.light-mode main {
+  background-color: #f8f9fa;
+  color: #000000;
+}
+
+body.light-mode .navbar {
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .navbar a,
+body.light-mode .navbar-text {
+  color: #000000 !important;
+}
+
+body.light-mode .card,
+body.light-mode .modal-content {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #dee2e6;
+}
+
+body.light-mode input,
+body.light-mode textarea,
+body.light-mode select {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ced4da;
+}
+
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #999999;
+}
+
+body.light-mode .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+body.light-mode .btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+body.light-mode .table {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #dee2e6;
+}
+
+body.light-mode .table thead th {
+  background-color: #f8f9fa;
+  color: #000000;
+  border-color: #dee2e6;
+}
+
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .container-fluid,
+body.dark-mode main {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .navbar {
+  background-color: #242424 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid #333333;
+}
+
+body.dark-mode .navbar a,
+body.dark-mode .navbar-text {
+  color: #e0e0e0 !important;
+}
+
+body.dark-mode .navbar a:hover {
+  color: #64b5f6 !important;
+}
+
+body.dark-mode .card,
+body.dark-mode .modal-content {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #999999;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #1976d2;
+  border-color: #1976d2;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #1565c0;
+  border-color: #0d47a1;
+}
+
+body.dark-mode .table {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+body.dark-mode .table thead th {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+body.dark-mode .text-muted {
+  color: #b0b0b0 !important;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #2a2a2a;
+  border-color: #404040;
+}
+
+body.dark-mode .dropdown-menu .dropdown-item {
+  color: #e0e0e0;
+}
+
+body.dark-mode .dropdown-menu .dropdown-item:hover,
+body.dark-mode .dropdown-menu .dropdown-item:focus {
+  background-color: #333333;
+  color: #e0e0e0;
+}
+
+body.dark-mode .btn {
+  color: #e0e0e0;
+}
+
+body.dark-mode .form-label {
+  color: #e0e0e0;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+  background-color: #333333;
+  color: #e0e0e0;
+  border-color: #64b5f6;
+  box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+}
+
+body.dark-mode .alert {
+  background-color: #2a2a2a;
+  border-color: #404040;
+  color: #e0e0e0;
+}
+
+body.dark-mode .alert-danger {
+  background-color: #5f2e2e;
+  border-color: #8b0000;
+  color: #ff6b6b;
+}
+
+body.dark-mode .alert-success {
+  background-color: #2e5f2e;
+  border-color: #008000;
+  color: #51cf66;
+}
+
+body.dark-mode .badge {
+  background-color: #333333;
+  color: #e0e0e0;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  margin-left: 1rem;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.2);
+}
+
+body.dark-mode .theme-toggle-btn {
+  color: #e0e0e0;
+}
+
+body.light-mode .theme-toggle-btn {
+  color: #000000;
+}

@@ -1,0 +1,336 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.div-row{
+  background-color: #464545;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  padding: 50px;
+}
+
+.div-col{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.div-form{
+  background-color: white;
+  border-radius: 5px;
+  border-color: rgb(201, 187, 63);
+  border-width: thin;
+  border-style: solid;
+  padding: 10px;
+  margin: 10px;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.navigation{
+  background-color: burlywood;
+  height: 75px;
+}
+
+.navs{
+  padding: 10px;
+}
+
+.footer{
+  background-color: burlywood;
+  height: 50px;
+  text-align: center;
+  justify-content: center;
+  padding: 10px;
+  display: flex;
+  flex-shrink: 0;
+  position: relative;
+  bottom: 0;
+}
+
+.profilepic{
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.bannerpic{
+  padding: 10px;
+  width:90%;
+}
+
+.logo{
+  width: 50%;
+  height: 50%;
+}
+
+.pushbutton{
+  width: 50%;
+  padding: 10px;
+}
+
+.postimg{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.ontheway-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  position: relative;
+  padding-bottom: 70px;
+}
+
+.ontheway-wrapper {
+  max-width: 900px;
+  margin-top: 20px;
+}
+
+.ontheway-logo {
+  height: 80px;
+  object-fit: contain;
+}
+
+.ontheway-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.ontheway-search-group {
+  border-radius: 25px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.ontheway-search-input {
+  border: none;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+}
+
+.ontheway-search-input:focus {
+  box-shadow: none;
+}
+
+.ontheway-search-icon {
+  background-color: #444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.ontheway-list {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.ontheway-list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.ontheway-list-item:last-child {
+  border-bottom: none;
+}
+
+.ontheway-place-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ontheway-place-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.ontheway-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60px;
+  background-color: #e0e0e0;
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  align-items: center;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+.ontheway-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #444;
+  cursor: pointer;
+}
+
+.ontheway-bottom-nav .nav-item.active {
+  color: #000;
+  font-weight: 600;
+}
+
+.ontheway-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #444;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.ontheway-bottom-nav .nav-item.active {
+  color: #000;
+  font-weight: 600;
+}
+
+.navs .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #333;
+  text-decoration: none;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+
+.navs .nav-link:hover {
+  color: #000;
+}
+
+.navigation {
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  height: 70px !important;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.navs .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.navs .nav-link:hover {
+  color: #000;
+}
+
+body.dark-mode .ontheway-page input,
+body.dark-mode .ontheway-page textarea,
+body.dark-mode .ontheway-page select,
+body.dark-mode .ontheway-page .form-control {
+  color: #fff !important;
+}
+
+body.dark-mode .ontheway-page input::placeholder,
+body.dark-mode .ontheway-page textarea::placeholder,
+body.dark-mode .ontheway-page .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+  opacity: 1 !important;
+}
+
+body.dark-mode .ontheway-page input::-webkit-input-placeholder,
+body.dark-mode .ontheway-page textarea::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+body.dark-mode .ontheway-page input:-ms-input-placeholder,
+body.dark-mode .ontheway-page textarea:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+body.dark-mode .ontheway-page select option {
+  color: #000 !important;
+}
+
+body.dark-mode .ontheway-page select,
+body.dark-mode .ontheway-page .form-select,
+body.dark-mode .ontheway-page .form-control {
+  background-color: #1b1b1b !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+body.dark-mode .ontheway-page select option {
+  background-color: #1b1b1b !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .ontheway-page select:focus {
+  background-color: #1b1b1b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .ontheway-page option:hover,
+body.dark-mode .ontheway-page option:checked {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+}

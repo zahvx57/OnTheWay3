@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PlaceDetails Snapshot renders correctly and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="ontheway-page"
+    style="min-height: 100vh; background: rgb(245, 247, 251); padding-bottom: 80px; padding-top: 14px;"
+  >
+    <div
+      class="ontheway-wrapper mt-5 container"
+      style="max-width: 980px; margin-top: 14px;"
+    >
+      <div
+        class="row"
+      >
+        <div
+          class="text-center col"
+        >
+          <p
+            style="color: rgb(107, 114, 128); margin-bottom: 0px; font-size: 0.92rem;"
+          >
+            Loading place details...
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

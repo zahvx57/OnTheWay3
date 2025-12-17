@@ -1,0 +1,194 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Order Component Snapshot renders correctly and matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    style="min-height: 100vh; background: rgb(245, 247, 251); padding-bottom: 80px; padding-top: 14px;"
+  >
+    <div
+      class="container"
+      style="max-width: 980px; margin-top: 14px;"
+    >
+      <div
+        class="row"
+      >
+        <div
+          class="text-center col"
+        >
+          <h2
+            style="color: rgb(17, 24, 39); font-weight: 900; font-size: 1.55rem; margin-bottom: 6px;"
+          >
+            Order / Checkout
+          </h2>
+          <p
+            style="color: rgb(107, 114, 128); margin-top: 6px; font-size: 0.92rem;"
+          >
+            Review your selected delegate and fill in your details.
+          </p>
+        </div>
+      </div>
+      <div
+        class="justify-content-center mt-4 row"
+      >
+        <div
+          class="col-md-8 col-lg-6"
+        >
+          <div
+            class="card"
+            style="background: rgb(255, 255, 255); border: 1px solid #e6eaf2; border-radius: 16px; box-shadow: 0 14px 30px rgba(0,0,0,0.10);"
+          >
+            <div
+              class="text-center card-body"
+            >
+              <h4
+                style="color: rgb(17, 24, 39); font-weight: 900;"
+              >
+                Test Delegate
+              </h4>
+              <p
+                class="card-text"
+                style="color: rgb(17, 24, 39); margin-bottom: 6px; font-weight: 600;"
+              >
+                📍 Test Place
+              </p>
+              <p
+                class="card-text"
+                style="color: rgb(17, 24, 39); margin-bottom: 6px; font-weight: 600;"
+              >
+                📞 123456789
+              </p>
+              <p
+                class="card-text"
+                style="color: rgb(17, 24, 39); margin-bottom: 10px; font-weight: 900;"
+              >
+                💰 2.5 OMR
+              </p>
+              <div
+                style="background: rgb(243, 244, 246); border: 1px solid #e6eaf2; border-radius: 14px; padding: 12px 14px; text-align: left; color: rgb(17, 24, 39);"
+              >
+                <div
+                  style="font-weight: 900; margin-bottom: 6px; font-size: 0.95rem;"
+                >
+                  Detected Location
+                </div>
+                <div
+                  style="font-size: 0.86rem; color: rgb(107, 114, 128);"
+                >
+                  Lat: 
+                  <b>
+                    23.61
+                  </b>
+                   , Lng: 
+                  <b>
+                    58.59
+                  </b>
+                </div>
+                <div
+                  style="margin-top: 8px;"
+                >
+                  <a
+                    href="https://www.google.com/maps?q=23.61,58.59"
+                    rel="noreferrer"
+                    style="color: rgb(0, 87, 183); text-decoration: none; font-weight: 800;"
+                    target="_blank"
+                  >
+                    Open in Google Maps
+                  </a>
+                </div>
+                <div
+                  style="margin-top: 10px;"
+                >
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    style="background: rgb(255, 255, 255); color: rgb(17, 24, 39); border: 1px solid #e6eaf2; border-radius: 12px; padding: 8px 12px; font-weight: 800;"
+                    type="button"
+                  >
+                    Use detected location
+                  </button>
+                </div>
+              </div>
+              <div
+                style="height: 1px; background: rgb(238, 242, 247); margin: 14px 0px;"
+              />
+              <form
+                class=""
+                style="text-align: left;"
+              >
+                <div
+                  class="mb-3"
+                >
+                  <label
+                    class="form-label"
+                    style="color: rgb(17, 24, 39); font-weight: 800; margin-bottom: 6px;"
+                  >
+                    Customer Location
+                  </label>
+                  <input
+                    class="form-control"
+                    placeholder="Enter address or paste Google Maps link"
+                    style="background: rgb(255, 255, 255); color: rgb(17, 24, 39); border: 1px solid #e6eaf2; border-radius: 12px; padding: 10px 12px;"
+                    type="text"
+                    value=""
+                  />
+                </div>
+                <div
+                  class="mb-3"
+                  style="margin-top: 12px;"
+                >
+                  <label
+                    class="form-label"
+                    style="color: rgb(17, 24, 39); font-weight: 800; margin-bottom: 6px;"
+                  >
+                    Payment Method
+                  </label>
+                  <select
+                    class="form-select"
+                    style="background: rgb(255, 255, 255); color: rgb(17, 24, 39); border: 1px solid #e6eaf2; border-radius: 12px; padding: 10px 12px;"
+                  >
+                    <option
+                      value="cash"
+                    >
+                      Cash on Delivery
+                    </option>
+                    <option
+                      value="card"
+                    >
+                      Credit / Debit Card
+                    </option>
+                    <option
+                      value="wallet"
+                    >
+                      Wallet / Online Payment
+                    </option>
+                  </select>
+                </div>
+                <div
+                  style="margin-top: 18px; text-align: center;"
+                >
+                  <button
+                    class="btn btn-secondary"
+                    style="background: rgb(17, 24, 39); color: rgb(255, 255, 255); border: 1px solid #e6eaf2; border-radius: 12px; padding: 10px 18px; font-weight: 900;"
+                    type="button"
+                  >
+                    Confirm Order
+                  </button>
+                </div>
+                <div
+                  style="margin-top: 12px; text-align: center;"
+                >
+                  <a
+                    href="/home"
+                    style="color: rgb(0, 87, 183); text-decoration: none; font-weight: 800;"
+                  >
+                    ← Change delegate
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
