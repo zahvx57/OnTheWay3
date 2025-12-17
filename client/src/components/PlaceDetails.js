@@ -159,7 +159,7 @@ const PlaceDetails = () => {
       try {
         setLoading(true);
 
-        const placesRes = await fetch("http://localhost:5000/places");
+        const placesRes = await fetch("https://ontheway8.onrender.com/places");
         const placesData = await placesRes.json();
         const allPlaces = Array.isArray(placesData) ? placesData : [];
 
@@ -168,7 +168,7 @@ const PlaceDetails = () => {
 
         if (foundPlace && foundPlace.name) {
           const delegatesRes = await fetch(
-            `http://localhost:5000/delegates/${encodeURIComponent(foundPlace.name)}`
+            `https://ontheway8.onrender.com/delegates/${encodeURIComponent(foundPlace.name)}`
           );
           const delegatesData = await delegatesRes.json();
           setDelegates(Array.isArray(delegatesData) ? delegatesData : []);
@@ -285,7 +285,7 @@ const PlaceDetails = () => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/admin/delegate/${editingDelegateId}`, {
+      const res = await fetch(`https://ontheway8.onrender.com/admin/delegate/${editingDelegateId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -311,7 +311,7 @@ const PlaceDetails = () => {
     if (!window.confirm("Are you sure you want to delete this delegate?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/admin/delegate/${delegateId}`, {
+      const res = await fetch(`https://ontheway8.onrender.com/admin/delegate/${delegateId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -538,3 +538,4 @@ const PlaceDetails = () => {
 };
 
 export default PlaceDetails;
+
