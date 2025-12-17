@@ -1,119 +1,134 @@
-import { Container, Row, Col, FormGroup, Label, Input, Button } from "reactstrap";
-import Logo from "../assets/logo.png";
-import { UserSchemaValidation } from "../validations/userSchemaValidation";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getUser } from "../features/UserSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+// src/components/Login.js
 
+import { Container, Row, Col, FormGroup, Label, Input, Button } from "reactstrap";
+
+import Logo from "../assets/logo.png";
+
+import { UserSchemaValidation } from "../validations/userSchemaValidation";
+
+import { useForm } from "react-hook-form";
+
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import { useEffect } from "react";
+
+import { Link, useNavigate } from "react-router-dom";
+
+import { getUser, clearMessage } from "../features/UserSlice";
+
+import { useDispatch, useSelector } from "react-redux";
+ 
 const Login = () => {
-  let [email, setEmail] = useState("");
-  let [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.users.user);
-  const isSuccess = useSelector((state) => state.users.isSuccess);
-  const isError = useSelector((state) => state.users.isError);
+
   const navigate = useNavigate();
-
+ 
+  const { user, isSuccess, isError, isLoading, message } = useSelector((s) => s.users);
+ 
   const {
+
     register,
-    handleSubmit: submitForm,
+
+    handleSubmit,
+
     formState: { errors },
+
   } = useForm({ resolver: yupResolver(UserSchemaValidation) });
+ 
+  const onSubmit = (data) => {
 
-  const validate = () => {
-    const data = {
-      email: email,
-      password: password,
-    };
+    // data = {email, password}
+
     dispatch(getUser(data));
+
   };
-
+ 
   useEffect(() => {
-    if (user && isSuccess) {
+
+    // ✅ نجاح حقيقي فقط لو عندك user
+
+    if (isSuccess && (user?._id || user?.email)) {
+
       navigate("/home");
-    }
-    if (isError) {
-      navigate("/");
-    }
-  }, [user, isSuccess, isError, navigate]);
 
+      dispatch(clearMessage());
+
+    }
+
+  }, [isSuccess, user, navigate, dispatch]);
+ 
   return (
-    <div>
-      <Container fluid>
-        <Row className="div-row">
-          <Col md="6" className="div-col">
-            <form className="div-form">
-              <div>
-                <img
-                  alt="Logo"
-                  className="img-fluid rounded mx-auto d-block"
-                  src={Logo}
-                />
-              </div>
-
+<div>
+<Container fluid>
+<Row className="div-row">
+<Col md="6" className="div-col">
+<form className="div-form" onSubmit={handleSubmit(onSubmit)}>
+<div>
+<img alt="Logo" className="img-fluid rounded mx-auto d-block" src={Logo} />
+</div>
+ 
               <FormGroup>
-                <Label>Email</Label>
-                <input
-                  {...register("email", {
-                    value: email,
-                    onChange: (e) => setEmail(e.target.value),
-                  })}
+<Label>Email</Label>
+<Input
+
+                  {...register("email")}
+
                   placeholder="Please Enter your Email here..."
+
                   type="email"
-                  className="form-control"
-                />
-                <p style={{ color: "red" }}>{errors.email?.message}</p>
-              </FormGroup>
 
+                />
+<p style={{ color: "red" }}>{errors.email?.message}</p>
+</FormGroup>
+ 
               <FormGroup>
-                <Label>Password</Label>
-                <input
-                  {...register("password", {
-                    value: password,
-                    onChange: (e) => setPassword(e.target.value),
-                  })}
+<Label>Password</Label>
+<Input
+
+                  {...register("password")}
+
                   placeholder="Please Enter your Password here..."
+
                   type="password"
-                  className="form-control"
+
                 />
-                <p style={{ color: "red" }}>{errors.password?.message}</p>
-              </FormGroup>
+<p style={{ color: "red" }}>{errors.password?.message}</p>
+</FormGroup>
+ 
+              <FormGroup check>
+<Input type="checkbox" /> <Label check>Remember Me</Label>
+</FormGroup>
+ 
+              {isError && <p style={{ color: "red", marginTop: 10 }}>{message}</p>}
+ 
+              <FormGroup style={{ marginTop: 10 }}>
+<Button type="submit" className="form-control" color="dark" disabled={isLoading}>
 
-              <FormGroup>
-                <Input type="checkbox" /> <Label>Remmber Me</Label>
-              </FormGroup>
-
-              <FormGroup>
-                <Button
-                  type="button"  // ✅ added to prevent form submit issues
-                  onClick={submitForm(validate)}
-                  className="form-control"
-                  color="dark"
-                >
-                  Sign In
-                </Button>
-              </FormGroup>
-
+                  {isLoading ? "Signing in..." : "Sign In"}
+</Button>
+</FormGroup>
+ 
               <FormGroup className="text-center">
-                <Label>Forget password</Label>
-              </FormGroup>
-
+<Label>Forget password</Label>
+</FormGroup>
+ 
               <FormGroup className="text-center">
-                <Label>
+<Label>
+
                   No Account? <Link to="/register">Sign Up Now...</Link>
-                </Label>
-              </FormGroup>
-            </form>
-          </Col>
-        </Row>
-      </Container>
-    </div>
-  );
-};
+</Label>
+</FormGroup>
+</form>
+</Col>
+</Row>
+</Container>
+</div>
 
+  );
+
+};
+ 
 export default Login;
+
+ 
