@@ -43,26 +43,37 @@ const Admin = () => {
   useEffect(() => {
     fetch("https://ontheway10.onrender.com/places")
       .then((res) => res.json())
-      .then((data) => setPlaces(Array.isArray(data) ? data : []));
+      .then((data) => setPlaces(Array.isArray(data) ? data : []))
+      .catch(() => setPlaces([]));
   }, []);
 
   const handleAddPlace = async (e) => {
     e.preventDefault();
     if (!placeName.trim()) return showMessage("Place name is required.");
 
-    const res = await fetch("https://ontheway10.onrender.com/admin/place", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name: placeName, city: placeCity }),
-    });
+    try {
+      const res = await fetch("https://ontheway10.onrender.com/addPlace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name: placeName, city: placeCity }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) showMessage(data.message || "Failed");
-    else {
-      showMessage("Place added successfully.");
-      setPlaceName("");
-      setPlaceCity("");
-      if (data.place) setPlaces((p) => [...p, data.place]);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) showMessage(data.message || "Failed");
+      else {
+        showMessage(data.message || "Place added successfully.");
+        setPlaceName("");
+        setPlaceCity("");
+        if (data.place) setPlaces((p) => [...p, data.place]);
+        else {
+          const r = await fetch("https://ontheway10.onrender.com/places");
+          const d = await r.json();
+          setPlaces(Array.isArray(d) ? d : []);
+        }
+      }
+    } catch {
+      showMessage("Server error while adding place.");
     }
   };
 
@@ -72,30 +83,35 @@ const Admin = () => {
     if (!delegateName || !delegatePhone || !delegateFee || !selectedPlaceName)
       return showMessage("Fill all required fields.");
 
-    const res = await fetch("https://ontheway10.onrender.com/admin/delegate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        name: delegateName,
-        phone: delegatePhone,
-        fee: Number(delegateFee),
-        rating: Number(delegateRating),
-        avatar: delegateAvatarUrl,
-        place: selectedPlaceName,
-      }),
-    });
+    try {
+      const res = await fetch("https://ontheway10.onrender.com/addDelegate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name: delegateName,
+          phone: delegatePhone,
+          fee: Number(delegateFee),
+          rating: Number(delegateRating),
+          avatar: delegateAvatarUrl,
+          place: selectedPlaceName,
+        }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) showMessage(data.message || "Failed");
-    else {
-      showMessage("Delegate added successfully.");
-      setDelegateName("");
-      setDelegatePhone("");
-      setDelegateFee("");
-      setDelegateRating("4.5");
-      setDelegateAvatarUrl("");
-      setSelectedPlaceName("");
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) showMessage(data.message || "Failed");
+      else {
+        showMessage(data.message || "Delegate added successfully.");
+        setDelegateName("");
+        setDelegatePhone("");
+        setDelegateFee("");
+        setDelegateRating("4.5");
+        setDelegateAvatarUrl("");
+        setSelectedPlaceName("");
+      }
+    } catch {
+      showMessage("Server error while adding delegate.");
     }
   };
 
@@ -131,7 +147,7 @@ const Admin = () => {
                     <Label>City</Label>
                     <Input value={placeCity} onChange={(e) => setPlaceCity(e.target.value)} />
                   </FormGroup>
-                  <Button color="primary">Add Place</Button>
+                  <Button type="submit" color="primary">Add Place</Button>
                 </Form>
               </CardBody>
             </Card>
@@ -163,7 +179,7 @@ const Admin = () => {
                       ))}
                     </Input>
                   </FormGroup>
-                  <Button color="success">Add Delegate</Button>
+                  <Button type="submit" color="success">Add Delegate</Button>
                 </Form>
               </CardBody>
             </Card>
@@ -201,6 +217,3 @@ const Admin = () => {
 };
 
 export default Admin;
-
-
-
