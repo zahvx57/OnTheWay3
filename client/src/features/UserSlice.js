@@ -64,8 +64,6 @@ export const addUser = createAsyncThunk("users/register", async (udata, thunkAPI
 
 // ✅ Get ALL Users
 
-// ✅ /getUsers بدون token وبدون parameters
-
 // =====================
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, thunkAPI) => {
@@ -86,17 +84,73 @@ export const fetchUsers = createAsyncThunk("users/fetchUsers", async (_, thunkAP
  
 // =====================
 
+// ✅ Update Profile
+
+// =====================
+
+export const updateProfile = createAsyncThunk(
+
+  "users/updateProfile",
+
+  async (payload, thunkAPI) => {
+
+    try {
+
+      // payload: { currentEmail, uname, email, phone, pic }
+
+      const res = await axios.put(`${API}/user/profile`, payload);
+
+      return res.data; // { message, user }
+
+    } catch (err) {
+
+      return thunkAPI.rejectWithValue(err.response?.data || { message: "Update profile failed" });
+
+    }
+
+  }
+
+);
+ 
+// =====================
+
+// ✅ Change Password
+
+// =====================
+
+export const changePassword = createAsyncThunk(
+
+  "users/changePassword",
+
+  async (payload, thunkAPI) => {
+
+    try {
+
+      // payload: { email, currentPassword, newPassword }
+
+      const res = await axios.put(`${API}/user/password`, payload);
+
+      return res.data; // { message }
+
+    } catch (err) {
+
+      return thunkAPI.rejectWithValue(err.response?.data || { message: "Change password failed" });
+
+    }
+
+  }
+
+);
+ 
+// =====================
+
 // ✅ Initial State
 
 // =====================
 
 const initVal = {
 
-  // current logged in user
-
   user: JSON.parse(localStorage.getItem("user") || "null"),
- 
-  // all users list
 
   users: [],
  
@@ -128,6 +182,8 @@ const UserSlice = createSlice({
 
       state.user = null;
 
+      state.users = [];
+
       state.message = "";
 
       state.isLoading = false;
@@ -150,8 +206,6 @@ const UserSlice = createSlice({
 
     },
 
-    // ✅ لو تحب تضبط current user يدويًا (اختياري)
-
     setCurrentUser: (state, action) => {
 
       state.user = action.payload || null;
@@ -168,11 +222,7 @@ const UserSlice = createSlice({
 
     builder
 
-      // =====================
-
-      // ✅ login
-
-      // =====================
+      // ===== login =====
 
       .addCase(getUser.pending, (s) => {
 
@@ -212,11 +262,7 @@ const UserSlice = createSlice({
 
       })
  
-      // =====================
-
-      // ✅ register
-
-      // =====================
+      // ===== register =====
 
       .addCase(addUser.pending, (s) => {
 
@@ -250,11 +296,7 @@ const UserSlice = createSlice({
 
       })
  
-      // =====================
-
-      // ✅ fetch all users
-
-      // =====================
+      // ===== fetch users =====
 
       .addCase(fetchUsers.pending, (s) => {
 
@@ -285,6 +327,84 @@ const UserSlice = createSlice({
         s.isError = true;
 
         s.message = a.payload?.message || "Fetch users failed";
+
+      })
+ 
+      // ===== update profile =====
+
+      .addCase(updateProfile.pending, (s) => {
+
+        s.isLoading = true;
+
+        s.isError = false;
+
+        s.isSuccess = false;
+
+        s.message = "";
+
+      })
+
+      .addCase(updateProfile.fulfilled, (s, a) => {
+
+        s.isLoading = false;
+
+        s.isSuccess = true;
+
+        s.message = a.payload?.message || "Profile updated";
+ 
+        // ✅ حدّث current user في redux + localStorage
+
+        if (a.payload?.user) {
+
+          s.user = a.payload.user;
+
+          localStorage.setItem("user", JSON.stringify(s.user));
+
+        }
+
+      })
+
+      .addCase(updateProfile.rejected, (s, a) => {
+
+        s.isLoading = false;
+
+        s.isError = true;
+
+        s.message = a.payload?.message || "Update profile failed";
+
+      })
+ 
+      // ===== change password =====
+
+      .addCase(changePassword.pending, (s) => {
+
+        s.isLoading = true;
+
+        s.isError = false;
+
+        s.isSuccess = false;
+
+        s.message = "";
+
+      })
+
+      .addCase(changePassword.fulfilled, (s, a) => {
+
+        s.isLoading = false;
+
+        s.isSuccess = true;
+
+        s.message = a.payload?.message || "Password changed";
+
+      })
+
+      .addCase(changePassword.rejected, (s, a) => {
+
+        s.isLoading = false;
+
+        s.isError = true;
+
+        s.message = a.payload?.message || "Change password failed";
 
       });
 
