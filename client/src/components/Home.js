@@ -82,7 +82,7 @@ const Home = () => {
   useEffect(() => {
     const fetchPlaces = async () => {
       try {
-        const res = await fetch("http://localhost:5000/places");
+        const res = await fetch("https://ontheway8.onrender.com/places");
         const data = await res.json();
         setPlaces(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -119,7 +119,7 @@ const Home = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/admin/place/${editingPlaceId}`,
+        `https://ontheway8.onrender.com/admin/place/${editingPlaceId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -159,7 +159,7 @@ const Home = () => {
     if (!window.confirm("Are you sure you want to delete this place?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/admin/place/${placeId}`, {
+      const res = await fetch(`https://ontheway8.onrender.com/admin/place/${placeId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -688,3 +688,4 @@ const Home = () => {
 };
 
 export default Home;
+
