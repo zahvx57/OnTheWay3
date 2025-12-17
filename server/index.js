@@ -142,3 +142,73 @@ app.put("/user/profile", async (req, res) => {
       phone: user.phone,
       adminFlag: user.adminFlag,
     };
+ 
+    return res.status(200).json({ message: "Profile updated successfully.", user: safeUser });
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    return res.status(500).json({ message: "Error updating profile." });
+  }
+});
+ 
+// =====================
+// ✅ CHANGE PASSWORD
+// =====================
+app.put("/user/password", async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword } = req.body;
+ 
+    if (!email || !currentPassword || !newPassword)
+      return res.status(400).json({ message: "Email, current password and new password are required." });
+ 
+    const user = await UserModel.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found." });
+ 
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect." });
+ 
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+ 
+    return res.status(200).json({ message: "Password changed successfully." });
+  } catch (err) {
+    console.error("Error changing password:", err);
+    return res.status(500).json({ message: "Error changing password." });
+  }
+});
+ 
+// =====================
+// ✅ PLACES
+// =====================
+app.get("/places", async (req, res) => {
+  try {
+    const places = await PlaceModel.find({ isActive: true }).sort({ name: 1 });
+    return res.status(200).json(places);
+  } catch (err) {
+    console.error("Error fetching places:", err);
+    return res.status(500).json({ message: "Error fetching places." });
+  }
+});
+ 
+// =====================
+// ✅ DELEGATES
+// =====================
+app.get("/delegates", async (req, res) => {
+  try {
+    const delegates = await DelegateModel.find().sort({ name: 1 });
+    return res.status(200).json(delegates);
+  } catch (err) {
+    console.error("Error fetching delegates:", err);
+    return res.status(500).json({ message: "Error fetching delegates." });
+  }
+});
+ 
+app.get("/delegates/:placeName", async (req, res) => {
+  try {
+    const { placeName } = req.params;
+    const delegates = await DelegateModel.find({ place: placeName }).sort({ fee: 1 });
+    return res.status(200).json(delegates);
+  } catch (err) {
+    console.error("Error fetching delegates:", err);
+    return res.status(500).json({ message: "Error fetching delegates." });
+  }
+});
