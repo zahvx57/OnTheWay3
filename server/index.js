@@ -223,12 +223,7 @@ app.post("/addPlace", async (req, res) => {
   }
 });
 
-/* =========================================================
-   ✅ NEW: Update Place (Used by PlacesSlice updatePlace)
-   PUT /updatePlace/:id
-   body: { name, city, email? , adminFlag? }
-   returns: { message, places }
-========================================================= */
+
 app.put("/updatePlace/:id", async (req, res) => {
   try {
     const { name, city, email, adminFlag } = req.body;
@@ -258,7 +253,7 @@ app.put("/updatePlace/:id", async (req, res) => {
     place.city = city || "";
     await place.save();
 
-    // ✅ update delegates place if name changed
+    // update delegates place if name changed
     if (oldName !== newName) {
       await DelegateModel.updateMany({ place: oldName }, { $set: { place: newName } });
     }
@@ -271,12 +266,11 @@ app.put("/updatePlace/:id", async (req, res) => {
   }
 });
 
-/* =========================================================
-   ✅ NEW: Delete Place (Used by PlacesSlice deletePlace)
+  Delete Place (Used by PlacesSlice deletePlace)
    DELETE /deletePlace/:id
    body: { email? , adminFlag? }
    returns: { message, places }
-========================================================= */
+
 app.delete("/deletePlace/:id", async (req, res) => {
   try {
     const { email, adminFlag } = req.body;
@@ -511,3 +505,4 @@ app.delete("/admin/delegate/:id", async (req, res) => {
 app.get("/", (req, res) => {
   res.send("OnTheWay API is running ✅");
 });
+
