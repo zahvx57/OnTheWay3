@@ -308,7 +308,15 @@ const Home = () => {
                       <div
                         className="place-row"
                         style={itemStyle}
-                        onClick={() => navigate(`/place/${place._id}`)}
+                        onClick={(e) => {
+                          // ✅ FIX: إذا الضغط كان داخل input/button/etc لا نعمل navigate
+                          const blocked = e.target.closest(
+                            "button, a, input, textarea, select, label"
+                          );
+                          if (blocked) return;
+
+                          navigate(`/place/${place._id}`);
+                        }}
                       >
                         <div style={iconStyle(color)}>
                           <span>{short}</span>
@@ -356,7 +364,6 @@ const Home = () => {
                               </Button>
                             )}
 
-                            {/* ✅ Admin Actions فقط للأدمن */}
                             {isAdmin && (
                               <>
                                 <Button
@@ -365,7 +372,6 @@ const Home = () => {
                                   style={{ ...btnBase, fontWeight: 900 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    // عدّل الرابط حسب صفحة التعديل عندك
                                     navigate(`/admin/places/edit/${place._id}`);
                                   }}
                                 >
@@ -378,8 +384,6 @@ const Home = () => {
                                   style={{ ...btnBase, fontWeight: 900 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    // هنا فقط التنقل لصفحة حذف/تأكيد الحذف
-                                    // أو اربطها ب thunk/delete action لاحقًا
                                     navigate(`/admin/places/delete/${place._id}`);
                                   }}
                                 >
