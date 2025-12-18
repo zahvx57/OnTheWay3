@@ -22,7 +22,6 @@ const Register = () => {
     mode: "onSubmit",
   });
 
-  // Reactstrap + RHF fix
   const { ref: unameRef, ...unameReg } = register("uname");
   const { ref: picRef, ...picReg } = register("pic");
   const { ref: emailRef, ...emailReg } = register("email");
@@ -39,7 +38,6 @@ const Register = () => {
     dispatch(addUser(payload));
   };
 
-  // ⏳ بعد ما المسج تظهر اعمل Navigate
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
@@ -123,7 +121,6 @@ const Register = () => {
               </FormGroup>
 
               <FormGroup>
-                {/* ✅ مسج النجاح / الفشل */}
                 {message && (
                   <p style={{ color: "green", textAlign: "center" }}>
                     {message}
@@ -139,4 +136,3 @@ const Register = () => {
 };
 
 export default Register;
-
