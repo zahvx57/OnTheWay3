@@ -63,24 +63,32 @@ const Home = () => {
 
   const [searchText, setSearchText] = useState("");
 
-  // ✅ Admin inline edit states (بدون تغيير أي شيء آخر)
+  // ✅ Admin inline edit states
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
   const [editCity, setEditCity] = useState("");
+
+  // ✅ Local UI copy (عشان Save/Delete يكونوا شغّالين فوراً داخل نفس الصفحة)
+  const [localPlaces, setLocalPlaces] = useState([]);
 
   useEffect(() => {
     dispatch(fetchPlaces());
   }, [dispatch]);
 
+  // ✅ مزامنة بيانات redux -> localPlaces
+  useEffect(() => {
+    setLocalPlaces(places || []);
+  }, [places]);
+
   const filteredPlaces = useMemo(() => {
     const q = searchText.trim().toLowerCase();
-    return (places || []).filter((place) => {
+    return (localPlaces || []).filter((place) => {
       if (!q) return true;
       const name = place?.name?.toLowerCase() || "";
       const short = makeShort(place?.name).toLowerCase();
       return name.startsWith(q) || short.startsWith(q);
     });
-  }, [places, searchText]);
+  }, [localPlaces, searchText]);
 
   const searchTextColor = isDark ? "#ffffff" : "#0b0f17";
   const searchPlaceholderColor = isDark
@@ -212,15 +220,16 @@ const Home = () => {
     fontWeight: 700,
   };
 
-  // ✅ فقط لتحديث الواجهة بعد التعديل/الحذف (بدون API الآن)
+  // ✅ تحديث الواجهة بعد التعديل
   const updatePlaceLocal = (id, payload) => {
-    // NOTE: هذا فقط تحديث للواجهة. لو عندك API ارسل لي PlacesSlice وأربطه لك.
-    // (لا نغير شيء آخر)
+    setLocalPlaces((prev) =>
+      (prev || []).map((p) => (p?._id === id ? { ...p, ...payload } : p))
+    );
   };
 
+  // ✅ حذف من الواجهة بعد التأكيد
   const deletePlaceLocal = (id) => {
-    // NOTE: هذا فقط حذف من الواجهة مؤقتًا.
-    // لو عندك API ارسل لي PlacesSlice وأربطه لك.
+    setLocalPlaces((prev) => (prev || []).filter((p) => p?._id !== id));
   };
 
   return (
@@ -279,11 +288,14 @@ const Home = () => {
             <div style={listCard}>
               <div style={listHead}>
                 <div>
-                  <div style={{ color: textMain, fontWeight: 900, fontSize: "1.05rem" }}>
+                  <div
+                    style={{ color: textMain, fontWeight: 900, fontSize: "1.05rem" }}
+                  >
                     Places
                   </div>
                   <div style={{ color: textSub, fontWeight: 700, fontSize: "0.85rem" }}>
-                    {(filteredPlaces || []).length} result{(filteredPlaces || []).length === 1 ? "" : "s"}
+                    {(filteredPlaces || []).length} result
+                    {(filteredPlaces || []).length === 1 ? "" : "s"}
                   </div>
                 </div>
               </div>
@@ -326,7 +338,7 @@ const Home = () => {
                         className="place-row"
                         style={itemStyle}
                         onClick={(e) => {
-                          // ✅ FIX: إذا كنت تعدّل أو تضغط داخل input/button لا تروح لصفحة التفاصيل
+                          // ✅ لا تنقل لصفحة التفاصيل أثناء التعديل أو عند الضغط على input/button
                           if (editingId === place._id) return;
 
                           const blocked = e.target.closest(
@@ -352,14 +364,20 @@ const Home = () => {
                           )}
 
                           {place.description && (
-                            <div style={descStyle}>{place.description.slice(0, 90)}...</div>
+                            <div style={descStyle}>
+                              {place.description.slice(0, 90)}...
+                            </div>
                           )}
 
                           <div style={actionsWrap}>
                             <Button
                               size="sm"
                               color="primary"
-                              style={{ ...btnBase, backgroundColor: primary, borderColor: primary }}
+                              style={{
+                                ...btnBase,
+                                backgroundColor: primary,
+                                borderColor: primary,
+                              }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/place/${place._id}`);
@@ -383,7 +401,7 @@ const Home = () => {
                               </Button>
                             )}
 
-                            {/* ✅ Admin buttons فقط للأدمن */}
+                            {/* ✅ Admin buttons فقط للأدمن - داخل نفس الصفحة */}
                             {isAdmin && (
                               <>
                                 <Button
@@ -406,12 +424,16 @@ const Home = () => {
                                   style={{ ...btnBase, fontWeight: 900 }}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const ok = window.confirm("Are you sure you want to delete this place?");
+                                    const ok = window.confirm(
+                                      "Are you sure you want to delete this place?"
+                                    );
                                     if (!ok) return;
 
-                                    // ✅ هنا لو عندك API تربطه لاحقًا
-                                    // حالياً نعمل refresh list
-                                    dispatch(fetchPlaces());
+                                    // ✅ حذف مباشر من نفس الصفحة
+                                    deletePlaceLocal(place._id);
+
+                                    // ✅ إذا تبغى مزامنة مع السيرفر لاحقًا
+                                    // dispatch(fetchPlaces());
                                   }}
                                 >
                                   Delete
@@ -420,14 +442,16 @@ const Home = () => {
                             )}
                           </div>
 
-                          {/* ✅ Edit form يظهر فقط للأدمن وعند الضغط Edit */}
+                          {/* ✅ Edit form يظهر فقط للأدمن وداخل نفس الصفحة */}
                           {isAdmin && isEditing && (
                             <div
                               style={{ marginTop: "14px" }}
                               onMouseDown={(e) => e.stopPropagation()}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div style={{ color: textSub, fontWeight: 800, marginBottom: "6px" }}>
+                              <div
+                                style={{ color: textSub, fontWeight: 800, marginBottom: "6px" }}
+                              >
                                 Place Name
                               </div>
                               <Input
@@ -438,7 +462,14 @@ const Home = () => {
                                 onClick={(e) => e.stopPropagation()}
                               />
 
-                              <div style={{ color: textSub, fontWeight: 800, marginTop: "12px", marginBottom: "6px" }}>
+                              <div
+                                style={{
+                                  color: textSub,
+                                  fontWeight: 800,
+                                  marginTop: "12px",
+                                  marginBottom: "6px",
+                                }}
+                              >
                                 City
                               </div>
                               <Input
@@ -453,14 +484,24 @@ const Home = () => {
                                 <Button
                                   size="sm"
                                   color="primary"
-                                  style={{ ...btnBase, backgroundColor: primary, borderColor: primary }}
+                                  style={{
+                                    ...btnBase,
+                                    backgroundColor: primary,
+                                    borderColor: primary,
+                                  }}
                                   onClick={(e) => {
                                     e.stopPropagation();
 
-                                    // ✅ هنا مكان حفظ التعديل (اربطه بـ API لاحقًا)
-                                    // حالياً فقط نغلق ونحدث القائمة
+                                    // ✅ حفظ التعديل داخل نفس الصفحة
+                                    updatePlaceLocal(place._id, {
+                                      name: editName,
+                                      city: editCity,
+                                    });
+
                                     setEditingId(null);
-                                    dispatch(fetchPlaces());
+
+                                    // ✅ إذا تبغى مزامنة مع السيرفر لاحقًا
+                                    // dispatch(fetchPlaces());
                                   }}
                                 >
                                   Save
@@ -485,7 +526,9 @@ const Home = () => {
 
                         <div
                           style={{
-                            color: isDark ? "rgba(255,255,255,0.35)" : "rgba(11,15,23,0.30)",
+                            color: isDark
+                              ? "rgba(255,255,255,0.35)"
+                              : "rgba(11,15,23,0.30)",
                             fontWeight: 900,
                             paddingTop: "4px",
                           }}
