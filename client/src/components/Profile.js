@@ -31,7 +31,7 @@ const Profile = () => {
 
   const isAdmin = user?.adminFlag === "Y";
 
-  // ✅ مهم: نخزن ايميل المستخدم الحالي لأنه مفتاح التحديث بالسيرفر
+
   const [currentEmail, setCurrentEmail] = useState(user?.email || "");
 
   const [uname, setUname] = useState(user?.uname || "");
@@ -71,7 +71,7 @@ const Profile = () => {
       updateProfile({
         currentEmail,
         uname,
-        pic, // السيرفر يحفظها في profilepic
+        pic, 
       })
     );
   };
@@ -277,3 +277,4 @@ const Profile = () => {
 };
 
 export default Profile;
+
