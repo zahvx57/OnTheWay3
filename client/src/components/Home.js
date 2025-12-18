@@ -58,6 +58,9 @@ const Home = () => {
   const themeMode = useSelector((state) => state.theme.mode);
   const isDark = themeMode === "dark";
 
+  const user = useSelector((state) => state.users?.user);
+  const isAdmin = user?.adminFlag === "Y";
+
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
@@ -338,18 +341,20 @@ const Home = () => {
                               View Details
                             </Button>
 
-                            <Button
-                              size="sm"
-                              outline
-                              color={isDark ? "light" : "dark"}
-                              style={btnBase}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                dispatch(addFavorite(place));
-                              }}
-                            >
-                              ❤ Favorite
-                            </Button>
+                            {!isAdmin && (
+                              <Button
+                                size="sm"
+                                outline
+                                color={isDark ? "light" : "dark"}
+                                style={btnBase}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  dispatch(addFavorite(place));
+                                }}
+                              >
+                                ❤ Favorite
+                              </Button>
+                            )}
                           </div>
                         </div>
 
