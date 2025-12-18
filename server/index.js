@@ -223,6 +223,92 @@ app.post("/addPlace", async (req, res) => {
   }
 });
 
+/* =========================================================
+   ✅ NEW: Update Place (Used by PlacesSlice updatePlace)
+   PUT /updatePlace/:id
+   body: { name, city, email? , adminFlag? }
+   returns: { message, places }
+========================================================= */
+app.put("/updatePlace/:id", async (req, res) => {
+  try {
+    const { name, city, email, adminFlag } = req.body;
+
+    let isAdmin = false;
+
+    if (email) {
+      const adminUser = await UserModel.findOne({ email });
+      isAdmin = !!adminUser && adminUser.adminFlag === "Y";
+    } else if (adminFlag) {
+      isAdmin = adminFlag === "Y";
+    }
+
+    if (!isAdmin) return res.status(403).json({ message: "Admin only." });
+
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ message: "Place name is required." });
+    }
+
+    const place = await PlaceModel.findById(req.params.id);
+    if (!place) return res.status(404).json({ message: "Place not found." });
+
+    const oldName = place.name;
+    const newName = String(name).trim();
+
+    place.name = newName;
+    place.city = city || "";
+    await place.save();
+
+    // ✅ update delegates place if name changed
+    if (oldName !== newName) {
+      await DelegateModel.updateMany({ place: oldName }, { $set: { place: newName } });
+    }
+
+    const places = await PlaceModel.find().sort({ name: 1 });
+    return res.status(200).json({ message: "Updated", places });
+  } catch (err) {
+    console.error("Error updating place:", err);
+    return res.status(500).json({ message: "Error updating place." });
+  }
+});
+
+/* =========================================================
+   ✅ NEW: Delete Place (Used by PlacesSlice deletePlace)
+   DELETE /deletePlace/:id
+   body: { email? , adminFlag? }
+   returns: { message, places }
+========================================================= */
+app.delete("/deletePlace/:id", async (req, res) => {
+  try {
+    const { email, adminFlag } = req.body;
+
+    let isAdmin = false;
+
+    if (email) {
+      const adminUser = await UserModel.findOne({ email });
+      isAdmin = !!adminUser && adminUser.adminFlag === "Y";
+    } else if (adminFlag) {
+      isAdmin = adminFlag === "Y";
+    }
+
+    if (!isAdmin) return res.status(403).json({ message: "Admin only." });
+
+    const place = await PlaceModel.findById(req.params.id);
+    if (!place) return res.status(404).json({ message: "Place not found." });
+
+    if (place?.name) {
+      await DelegateModel.deleteMany({ place: place.name });
+    }
+
+    await PlaceModel.findByIdAndDelete(req.params.id);
+
+    const places = await PlaceModel.find().sort({ name: 1 });
+    return res.status(200).json({ message: "Deleted", places });
+  } catch (err) {
+    console.error("Error deleting place:", err);
+    return res.status(500).json({ message: "Error deleting place." });
+  }
+});
+
 app.put("/admin/place/:id", async (req, res) => {
   try {
     const { email, name, city } = req.body;
@@ -298,7 +384,10 @@ app.get("/delegates/:placeName", async (req, res) => {
     const placeName = decodeURIComponent(req.params.placeName || "").trim();
     if (!placeName) return res.status(200).json([]);
 
-    const delegates = await DelegateModel.find({ place: placeName }).sort({ fee: 1, createdAt: -1 });
+    const delegates = await DelegateModel.find({ place: placeName }).sort({
+      fee: 1,
+      createdAt: -1,
+    });
     return res.status(200).json(delegates);
   } catch (err) {
     console.error("Error fetching delegates:", err);
@@ -347,7 +436,9 @@ app.post("/addDelegate", async (req, res) => {
     await newDelegate.save();
 
     const delegates = await DelegateModel.find().sort({ name: 1 });
-    return res.status(200).json({ message: "Delegate added successfully.", delegates });
+    return res
+      .status(200)
+      .json({ message: "Delegate added successfully.", delegates });
   } catch (err) {
     console.error("Error adding delegate:", err);
     return res.status(500).json({ message: "Error adding delegate." });
