@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import Logo from "../assets/logo.png";
-import { fetchPlaces } from "../features/PlacesSlice";
+import { fetchPlaces, deletePlace, updatePlace } from "../features/PlacesSlice";
 import { addFavorite } from "../features/FavoriteSlice";
 
 const makeShort = (name = "") => {
@@ -68,27 +68,19 @@ const Home = () => {
   const [editName, setEditName] = useState("");
   const [editCity, setEditCity] = useState("");
 
-  // ✅ Local UI copy (عشان Save/Delete يكونوا شغّالين فوراً داخل نفس الصفحة)
-  const [localPlaces, setLocalPlaces] = useState([]);
-
   useEffect(() => {
     dispatch(fetchPlaces());
   }, [dispatch]);
 
-  // ✅ مزامنة بيانات redux -> localPlaces
-  useEffect(() => {
-    setLocalPlaces(places || []);
-  }, [places]);
-
   const filteredPlaces = useMemo(() => {
     const q = searchText.trim().toLowerCase();
-    return (localPlaces || []).filter((place) => {
+    return (places || []).filter((place) => {
       if (!q) return true;
       const name = place?.name?.toLowerCase() || "";
       const short = makeShort(place?.name).toLowerCase();
       return name.startsWith(q) || short.startsWith(q);
     });
-  }, [localPlaces, searchText]);
+  }, [places, searchText]);
 
   const searchTextColor = isDark ? "#ffffff" : "#0b0f17";
   const searchPlaceholderColor = isDark
@@ -220,18 +212,6 @@ const Home = () => {
     fontWeight: 700,
   };
 
-  // ✅ تحديث الواجهة بعد التعديل
-  const updatePlaceLocal = (id, payload) => {
-    setLocalPlaces((prev) =>
-      (prev || []).map((p) => (p?._id === id ? { ...p, ...payload } : p))
-    );
-  };
-
-  // ✅ حذف من الواجهة بعد التأكيد
-  const deletePlaceLocal = (id) => {
-    setLocalPlaces((prev) => (prev || []).filter((p) => p?._id !== id));
-  };
-
   return (
     <div style={pageStyle}>
       <style>{`
@@ -288,14 +268,11 @@ const Home = () => {
             <div style={listCard}>
               <div style={listHead}>
                 <div>
-                  <div
-                    style={{ color: textMain, fontWeight: 900, fontSize: "1.05rem" }}
-                  >
+                  <div style={{ color: textMain, fontWeight: 900, fontSize: "1.05rem" }}>
                     Places
                   </div>
                   <div style={{ color: textSub, fontWeight: 700, fontSize: "0.85rem" }}>
-                    {(filteredPlaces || []).length} result
-                    {(filteredPlaces || []).length === 1 ? "" : "s"}
+                    {(filteredPlaces || []).length} result{(filteredPlaces || []).length === 1 ? "" : "s"}
                   </div>
                 </div>
               </div>
@@ -338,7 +315,7 @@ const Home = () => {
                         className="place-row"
                         style={itemStyle}
                         onClick={(e) => {
-                          // ✅ لا تنقل لصفحة التفاصيل أثناء التعديل أو عند الضغط على input/button
+                          // ✅ لا تنقل أثناء التعديل أو عند الضغط على عناصر تفاعلية
                           if (editingId === place._id) return;
 
                           const blocked = e.target.closest(
@@ -364,20 +341,14 @@ const Home = () => {
                           )}
 
                           {place.description && (
-                            <div style={descStyle}>
-                              {place.description.slice(0, 90)}...
-                            </div>
+                            <div style={descStyle}>{place.description.slice(0, 90)}...</div>
                           )}
 
                           <div style={actionsWrap}>
                             <Button
                               size="sm"
                               color="primary"
-                              style={{
-                                ...btnBase,
-                                backgroundColor: primary,
-                                borderColor: primary,
-                              }}
+                              style={{ ...btnBase, backgroundColor: primary, borderColor: primary }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/place/${place._id}`);
@@ -429,11 +400,12 @@ const Home = () => {
                                     );
                                     if (!ok) return;
 
-                                    // ✅ حذف مباشر من نفس الصفحة
-                                    deletePlaceLocal(place._id);
-
-                                    // ✅ إذا تبغى مزامنة مع السيرفر لاحقًا
-                                    // dispatch(fetchPlaces());
+                                    dispatch(
+                                      deletePlace({
+                                        id: place._id,
+                                        adminFlag: user?.adminFlag,
+                                      })
+                                    );
                                   }}
                                 >
                                   Delete
@@ -449,9 +421,7 @@ const Home = () => {
                               onMouseDown={(e) => e.stopPropagation()}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div
-                                style={{ color: textSub, fontWeight: 800, marginBottom: "6px" }}
-                              >
+                              <div style={{ color: textSub, fontWeight: 800, marginBottom: "6px" }}>
                                 Place Name
                               </div>
                               <Input
@@ -462,14 +432,7 @@ const Home = () => {
                                 onClick={(e) => e.stopPropagation()}
                               />
 
-                              <div
-                                style={{
-                                  color: textSub,
-                                  fontWeight: 800,
-                                  marginTop: "12px",
-                                  marginBottom: "6px",
-                                }}
-                              >
+                              <div style={{ color: textSub, fontWeight: 800, marginTop: "12px", marginBottom: "6px" }}>
                                 City
                               </div>
                               <Input
@@ -484,24 +447,20 @@ const Home = () => {
                                 <Button
                                   size="sm"
                                   color="primary"
-                                  style={{
-                                    ...btnBase,
-                                    backgroundColor: primary,
-                                    borderColor: primary,
-                                  }}
-                                  onClick={(e) => {
+                                  style={{ ...btnBase, backgroundColor: primary, borderColor: primary }}
+                                  onClick={async (e) => {
                                     e.stopPropagation();
 
-                                    // ✅ حفظ التعديل داخل نفس الصفحة
-                                    updatePlaceLocal(place._id, {
-                                      name: editName,
-                                      city: editCity,
-                                    });
+                                    await dispatch(
+                                      updatePlace({
+                                        id: place._id,
+                                        name: editName,
+                                        city: editCity,
+                                        adminFlag: user?.adminFlag,
+                                      })
+                                    );
 
                                     setEditingId(null);
-
-                                    // ✅ إذا تبغى مزامنة مع السيرفر لاحقًا
-                                    // dispatch(fetchPlaces());
                                   }}
                                 >
                                   Save
@@ -526,9 +485,7 @@ const Home = () => {
 
                         <div
                           style={{
-                            color: isDark
-                              ? "rgba(255,255,255,0.35)"
-                              : "rgba(11,15,23,0.30)",
+                            color: isDark ? "rgba(255,255,255,0.35)" : "rgba(11,15,23,0.30)",
                             fontWeight: 900,
                             paddingTop: "4px",
                           }}
