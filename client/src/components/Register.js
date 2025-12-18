@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { addUser } from "../features/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Register = () => {
   const dispatch = useDispatch();
@@ -21,7 +22,7 @@ const Register = () => {
     mode: "onSubmit",
   });
 
-  // ✅ Reactstrap + RHF fix
+  // Reactstrap + RHF fix
   const { ref: unameRef, ...unameReg } = register("uname");
   const { ref: picRef, ...picReg } = register("pic");
   const { ref: emailRef, ...emailReg } = register("email");
@@ -32,12 +33,22 @@ const Register = () => {
       uname: data.uname,
       email: data.email,
       password: data.password,
-      profilepic: data.pic, // ✅ نفس اسم السيرفر
+      profilepic: data.pic,
     };
 
     dispatch(addUser(payload));
-    navigate("/");
   };
+
+  // ⏳ بعد ما المسج تظهر اعمل Navigate
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        navigate("/");
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [message, navigate]);
 
   return (
     <div>
@@ -46,7 +57,11 @@ const Register = () => {
           <Col md="6" className="div-col">
             <form className="div-form" onSubmit={handleSubmit(onSubmit)}>
               <div>
-                <img alt="Logo" className="img-fluid rounded mx-auto d-block" src={Logo} />
+                <img
+                  alt="Logo"
+                  className="img-fluid rounded mx-auto d-block"
+                  src={Logo}
+                />
               </div>
 
               <FormGroup>
@@ -57,7 +72,9 @@ const Register = () => {
                   placeholder="Please Enter your username here..."
                   type="text"
                 />
-                {errors.uname && <p style={{ color: "red" }}>{errors.uname.message}</p>}
+                {errors.uname && (
+                  <p style={{ color: "red" }}>{errors.uname.message}</p>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -68,7 +85,9 @@ const Register = () => {
                   placeholder="Please Enter your Profile picture here..."
                   type="text"
                 />
-                {errors.pic && <p style={{ color: "red" }}>{errors.pic.message}</p>}
+                {errors.pic && (
+                  <p style={{ color: "red" }}>{errors.pic.message}</p>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -79,7 +98,9 @@ const Register = () => {
                   placeholder="Please Enter your Email here..."
                   type="email"
                 />
-                {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+                {errors.email && (
+                  <p style={{ color: "red" }}>{errors.email.message}</p>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -90,7 +111,9 @@ const Register = () => {
                   placeholder="Please Enter your Password here..."
                   type="password"
                 />
-                {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
+                {errors.password && (
+                  <p style={{ color: "red" }}>{errors.password.message}</p>
+                )}
               </FormGroup>
 
               <FormGroup>
@@ -100,7 +123,12 @@ const Register = () => {
               </FormGroup>
 
               <FormGroup>
-                <p>{message}</p>
+                {/* ✅ مسج النجاح / الفشل */}
+                {message && (
+                  <p style={{ color: "green", textAlign: "center" }}>
+                    {message}
+                  </p>
+                )}
               </FormGroup>
             </form>
           </Col>
@@ -111,3 +139,4 @@ const Register = () => {
 };
 
 export default Register;
+
