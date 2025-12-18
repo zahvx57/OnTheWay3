@@ -60,8 +60,14 @@ const Home = () => {
 
   const user = useSelector((state) => state.users?.user);
   const isAdmin = user?.adminFlag === "Y";
+  const email = user?.email;
 
   const [searchText, setSearchText] = useState("");
+
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editCity, setEditCity] = useState("");
+  const [adminMsg, setAdminMsg] = useState("");
 
   useEffect(() => {
     dispatch(fetchPlaces());
@@ -97,6 +103,9 @@ const Home = () => {
   const searchBorder = isDark
     ? "rgba(255,255,255,0.10)"
     : "rgba(11,15,23,0.12)";
+
+  const danger = "#EF4444";
+  const warning = "#F59E0B";
 
   const pageStyle = {
     minHeight: "100vh",
@@ -207,6 +216,95 @@ const Home = () => {
     fontWeight: 700,
   };
 
+  const adminMsgStyle = {
+    marginTop: 10,
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: `1px solid ${border}`,
+    background: isDark ? "rgba(255,255,255,0.04)" : "rgba(47,128,255,0.06)",
+    color: textMain,
+    fontWeight: 800,
+    textAlign: "center",
+  };
+
+  const miniInputStyle = {
+    width: "100%",
+    backgroundColor: isDark ? "#0f1420" : "#ffffff",
+    color: textMain,
+    border: `1px solid ${searchBorder}`,
+    borderRadius: "12px",
+    padding: "8px 10px",
+    outline: "none",
+  };
+
+  const adminBtn = (bg) => ({
+    ...btnBase,
+    backgroundColor: bg,
+    borderColor: bg,
+    color: "#fff",
+  });
+
+  const startEdit = (place) => {
+    setEditingId(place._id);
+    setEditName(place.name || "");
+    setEditCity(place.city || "");
+    setAdminMsg("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName("");
+    setEditCity("");
+    setAdminMsg("");
+  };
+
+  const showAdminMsg = (txt) => {
+    setAdminMsg(txt);
+    setTimeout(() => setAdminMsg(""), 2500);
+  };
+
+  const saveEdit = async (placeId) => {
+    if (!email) return showAdminMsg("Login required.");
+    if (!editName.trim()) return showAdminMsg("Place name is required.");
+
+    try {
+      const res = await fetch(`https://ontheway10.onrender.com/admin/place/${placeId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name: editName, city: editCity }),
+      });
+      const data = await res.json();
+      if (!res.ok) return showAdminMsg(data.message || "Failed to update.");
+
+      showAdminMsg("Updated successfully.");
+      cancelEdit();
+      dispatch(fetchPlaces());
+    } catch (e) {
+      showAdminMsg("Server error.");
+    }
+  };
+
+  const deletePlace = async (placeId) => {
+    if (!email) return showAdminMsg("Login required.");
+    const ok = window.confirm("Delete this place?");
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`https://ontheway10.onrender.com/admin/place/${placeId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) return showAdminMsg(data.message || "Failed to delete.");
+
+      showAdminMsg("Deleted successfully.");
+      dispatch(fetchPlaces());
+    } catch (e) {
+      showAdminMsg("Server error.");
+    }
+  };
+
   return (
     <div style={pageStyle}>
       <style>{`
@@ -294,6 +392,8 @@ const Home = () => {
                     <FiSearch />
                   </InputGroupText>
                 </InputGroup>
+
+                {isAdmin && adminMsg && <div style={adminMsgStyle}>{adminMsg}</div>}
               </div>
 
               {!filteredPlaces || filteredPlaces.length === 0 ? (
@@ -302,6 +402,7 @@ const Home = () => {
                 filteredPlaces.map((place, index) => {
                   const short = makeShort(place?.name);
                   const color = colorPalette[index % colorPalette.length];
+                  const isEditing = editingId === place._id;
 
                   return (
                     <div key={place._id}>
@@ -355,7 +456,87 @@ const Home = () => {
                                 ❤ Favorite
                               </Button>
                             )}
+
+                            {isAdmin && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  style={adminBtn(warning)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    startEdit(place);
+                                  }}
+                                >
+                                  Edit
+                                </Button>
+
+                                <Button
+                                  size="sm"
+                                  style={adminBtn(danger)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deletePlace(place._id);
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </>
+                            )}
                           </div>
+
+                          {isAdmin && isEditing && (
+                            <div style={{ marginTop: 12 }}>
+                              <div style={{ display: "grid", gap: 10 }}>
+                                <div>
+                                  <div style={{ color: textSub, fontWeight: 800, fontSize: "0.82rem", marginBottom: 6 }}>
+                                    Place Name
+                                  </div>
+                                  <input
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    style={miniInputStyle}
+                                  />
+                                </div>
+
+                                <div>
+                                  <div style={{ color: textSub, fontWeight: 800, fontSize: "0.82rem", marginBottom: 6 }}>
+                                    City
+                                  </div>
+                                  <input
+                                    value={editCity}
+                                    onChange={(e) => setEditCity(e.target.value)}
+                                    style={miniInputStyle}
+                                  />
+                                </div>
+
+                                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                  <Button
+                                    size="sm"
+                                    style={adminBtn(primary)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      saveEdit(place._id);
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+
+                                  <Button
+                                    size="sm"
+                                    outline
+                                    color={isDark ? "light" : "dark"}
+                                    style={btnBase}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      cancelEdit();
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div
